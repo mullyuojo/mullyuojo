@@ -55,16 +55,17 @@ public class HubDelivery {
         this.deletedBy = userId;
     }
 
-    public HubDelivery(Long id, Long deliveryId, HubDeliveryStatus status, Long originHubId, Long destinationHubId, Double estimatedDistance, Double estimatedTime, Double actualDistance, Double actualTime, Long hubDeliveryManagerId) {
-        this.id = id;
+    public void changeStatus(HubDeliveryStatus status) {
+        this.status = status;
+    }
+
+    public HubDelivery( Long deliveryId, HubDeliveryStatus status, Long originHubId, Long destinationHubId, Double estimatedDistance, Double estimatedTime, Long hubDeliveryManagerId) {
         this.deliveryId = deliveryId;
         this.status = status;
         this.originHubId = originHubId;
         this.destinationHubId = destinationHubId;
         this.estimatedDistance = estimatedDistance;
         this.estimatedTime = estimatedTime;
-        this.actualDistance = actualDistance;
-        this.actualTime = actualTime;
-        HubDeliveryManagerId = hubDeliveryManagerId;
+        this.HubDeliveryManagerId = hubDeliveryManagerId;
     }
 }
