@@ -45,6 +45,10 @@ public class Delivery {
 
     private Long deletedBy;
 
+    public void changeStatus(DeliveryStatus status) {
+        this.status = status;
+    }
+
     public void softDelete(Long userId){
         this.deletedBy = userId;
     }
