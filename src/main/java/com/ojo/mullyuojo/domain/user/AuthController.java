@@ -24,8 +24,12 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp (@Valid @RequestBody AuthRequestDto authRequestDto) {
-        authService.signUp(authRequestDto);
-        return ResponseEntity.ok(new AuthResponseDto("완료되었습니다 회원가입"));
+        return ResponseEntity.ok(authService.signUp(authRequestDto));
+    }
+
+    @PostMapping("/logIn")
+    public ResponseEntity<?> logIn (@Valid @RequestBody AuthRequestDto authRequestDto) {
+        return ResponseEntity.ok(authService.logIn(authRequestDto));
     }
 
 

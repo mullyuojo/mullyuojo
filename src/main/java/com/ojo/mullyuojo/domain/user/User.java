@@ -1,21 +1,25 @@
 package com.ojo.mullyuojo.domain.user;
 
 import com.ojo.mullyuojo.domain.user.dto.AuthRequestDto;
-import com.ojo.mullyuojo.domain.user.dto.UserRequestDto;
-import com.ojo.mullyuojo.domain.user.enums.UserRole.UserRoles;
+import com.ojo.mullyuojo.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
 @Table(name = "p_users")
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +32,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    UserRoles role;
+    UserRole.UserRoles role;
 
     public User(AuthRequestDto authRequestDto) {
         this.username = authRequestDto.getUsername();
@@ -37,5 +41,38 @@ public class User {
         this.role = authRequestDto.getRole();
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority(role.name()));
+    }
 
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return deketed_at == null;
+    }
 }
