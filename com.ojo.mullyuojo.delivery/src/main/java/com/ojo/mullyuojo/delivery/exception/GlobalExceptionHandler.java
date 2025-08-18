@@ -2,9 +2,9 @@ package com.ojo.mullyuojo.delivery.exception;
 
 import com.ojo.mullyuojo.delivery.utils.ApiResponse;
 import jakarta.security.auth.message.AuthException;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.NotFoundException;
+//import jakarta.ws.rs.BadRequestException;
+//import jakarta.ws.rs.ForbiddenException;
+//import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,12 +20,12 @@ import java.util.Objects;
 public class GlobalExceptionHandler {
 
     //----------------------------400 Bad request
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleBadRequestException(BadRequestException ex) {
-        log.error("Validation error: {}", ex.getMessage());
-        return ApiResponse.error(400, ex.getMessage());
-    }
+//    @ExceptionHandler(BadRequestException.class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ApiResponse<?> handleBadRequestException(BadRequestException ex) {
+//        log.error("Validation error: {}", ex.getMessage());
+//        return ApiResponse.error(400, ex.getMessage());
+//    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -58,21 +58,21 @@ public class GlobalExceptionHandler {
     }
 
     //----------------------------403 Forbidden
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ApiResponse<?> handleForbiddenException(ForbiddenException ex) {
-        log.error("ForbiddenException: {}", ex.getMessage());
-        return ApiResponse.error(404, ex.getMessage());
-    }
-
-
-    //----------------------------404 Not found
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiResponse<?> handleNotFoundException(NotFoundException ex) {
-        log.error("NotFoundException: {}", ex.getMessage());
-        return ApiResponse.error(404, ex.getMessage());
-    }
+//    @ExceptionHandler(ForbiddenException.class)
+//    @ResponseStatus(HttpStatus.FORBIDDEN)
+//    public ApiResponse<?> handleForbiddenException(ForbiddenException ex) {
+//        log.error("ForbiddenException: {}", ex.getMessage());
+//        return ApiResponse.error(404, ex.getMessage());
+//    }
+//
+//
+//    //----------------------------404 Not found
+//    @ExceptionHandler(NotFoundException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ApiResponse<?> handleNotFoundException(NotFoundException ex) {
+//        log.error("NotFoundException: {}", ex.getMessage());
+//        return ApiResponse.error(404, ex.getMessage());
+//    }
 
     //----------------------------500 Internal server error
     @ExceptionHandler(NullPointerException.class)
