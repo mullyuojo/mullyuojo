@@ -1,16 +1,27 @@
 package com.ojo.mullyuojo.delivery.domain.delivery;
 
 import com.ojo.mullyuojo.delivery.domain.com_delivery.CompanyDeliveryService;
-import com.ojo.mullyuojo.delivery.domain.delivery.client.DeliveryUserDto;
+import com.ojo.mullyuojo.delivery.domain.com_delivery.status.CompanyDeliveryStatus;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyClient;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyDto;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubClient;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubDto;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.user.DeliveryUserDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryResponseDto;
+import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryUpdateRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.status.DeliveryStatus;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.HubDeliveryService;
+import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -20,6 +31,8 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final HubDeliveryService hubDeliveryService;
     private final CompanyDeliveryService companyDeliveryService;
+    private final DeliveryHubClient deliveryHubClient;
+    private final DeliveryCompanyClient deliveryCompanyClient;
     private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
 
     @Transactional
@@ -106,18 +119,24 @@ public class DeliveryService {
         return DeliveryResponseDto.from(delivery);
     }
 
+    @Transactional
     public void createDelivery(DeliveryRequestDto requestDto) {
+
+        if (!user.getUserRole().equals("MASTER")) {
+            throw new ForbiddenException("생성 권한이 없습니다.");
+        }
         Delivery delivery = new Delivery(requestDto.orderId(),
                 requestDto.deliveryStatus(),
                 requestDto.originHubId(),
                 requestDto.destinationHubId(),
-                requestDto.companyAddress(),
+                requestDto.destinationCompanyId(),
                 requestDto.companyManagerId(),
                 requestDto.companyManagerSlackId(),
+                requestDto.hubDeliveryManagerId(),
                 requestDto.companyDeliveryManagerId());
 
+
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
-        companyDeliveryService.createCompanyDeliveryByDelivery(delivery);
     }
 
     public void changeStatus(Long id, DeliveryStatus status) {
