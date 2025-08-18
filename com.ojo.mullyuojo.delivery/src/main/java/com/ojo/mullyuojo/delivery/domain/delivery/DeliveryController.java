@@ -1,10 +1,9 @@
 package com.ojo.mullyuojo.delivery.domain.delivery;
 
 
-import com.ojo.mullyuojo.delivery.domain.com_delivery.CompanyDeliveryService;
+import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryUpdateRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryResponseDto;
-import com.ojo.mullyuojo.delivery.domain.hub_delivery.HubDeliveryService;
 import com.ojo.mullyuojo.delivery.utils.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
