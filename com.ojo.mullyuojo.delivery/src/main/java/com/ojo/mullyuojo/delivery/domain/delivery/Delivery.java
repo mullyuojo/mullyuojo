@@ -30,7 +30,7 @@ public class Delivery {
     private Long destinationHubId;
 
     @Column(nullable = false)
-    private String companyAddress;
+    private Long destinationCompanyId;
 
     @Column(nullable = false)
     private Long companyManagerId;
@@ -39,7 +39,10 @@ public class Delivery {
     private String companyManagerSlackId;
 
     @Column(nullable = false)
-    private Long CompanyDeliveryManagerId;
+    private Long hubDeliveryManagerId;
+
+    @Column(nullable = false)
+    private Long companyDeliveryManagerId;
 
     private LocalDateTime deletedAt;
 
@@ -53,14 +56,27 @@ public class Delivery {
         this.deletedBy = userId;
     }
 
-    public Delivery( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, String companyAddress, Long companyManagerId, String companyManagerSlackId, Long companyDeliveryManagerId) {
+    public void update( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {
         this.orderId = orderId;
         this.status = status;
         this.originHubId = originHubId;
         this.destinationHubId = destinationHubId;
-        this.companyAddress = companyAddress;
+        this.destinationCompanyId = destinationCompanyId;
         this.companyManagerId = companyManagerId;
         this.companyManagerSlackId = companyManagerSlackId;
-        CompanyDeliveryManagerId = companyDeliveryManagerId;
+        this.hubDeliveryManagerId = hubDeliveryManagerId;
+        this.companyDeliveryManagerId = companyDeliveryManagerId;
+    }
+
+    public Delivery( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {
+        this.orderId = orderId;
+        this.status = status;
+        this.originHubId = originHubId;
+        this.destinationHubId = destinationHubId;
+        this.destinationCompanyId = destinationCompanyId;
+        this.companyManagerId = companyManagerId;
+        this.companyManagerSlackId = companyManagerSlackId;
+        this.hubDeliveryManagerId = hubDeliveryManagerId;
+        this.companyDeliveryManagerId = companyDeliveryManagerId;
     }
 }

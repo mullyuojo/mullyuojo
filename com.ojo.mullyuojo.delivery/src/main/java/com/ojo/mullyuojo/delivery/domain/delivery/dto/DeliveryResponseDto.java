@@ -2,9 +2,6 @@ package com.ojo.mullyuojo.delivery.domain.delivery.dto;
 
 import com.ojo.mullyuojo.delivery.domain.delivery.Delivery;
 import com.ojo.mullyuojo.delivery.domain.delivery.status.DeliveryStatus;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 
 public record DeliveryResponseDto(
         Long deliveryId,
@@ -12,9 +9,10 @@ public record DeliveryResponseDto(
         Long destinationHubId,
         Long orderId,
         DeliveryStatus deliveryStatus,
-        String companyAddress,
+        Long destinationCompanyId,
         Long companyManagerId,
         String companyManagerSlackId,
+        Long hubDeliveryManagerId,
         Long companyDeliveryManagerId
 ) {
     public static DeliveryResponseDto from(
@@ -26,9 +24,10 @@ public record DeliveryResponseDto(
                 delivery.getDestinationHubId(),
                 delivery.getOrderId(),
                 delivery.getStatus(),
-                delivery.getCompanyAddress(),
+                delivery.getDestinationCompanyId(),
                 delivery.getCompanyManagerId(),
                 delivery.getCompanyManagerSlackId(),
+                delivery.getHubDeliveryManagerId(),
                 delivery.getCompanyDeliveryManagerId()
         );
     }

@@ -13,11 +13,14 @@ public record DeliveryRequestDto(
         @NotNull
         DeliveryStatus deliveryStatus,
         @NotNull
-        String companyAddress,
+        Long destinationCompanyId,
         @NotNull
         Long companyManagerId,
         @NotNull
         String companyManagerSlackId,
+        @NotNull
+        Long hubDeliveryManagerId,
+
         @NotNull
         Long companyDeliveryManagerId
 ) {
