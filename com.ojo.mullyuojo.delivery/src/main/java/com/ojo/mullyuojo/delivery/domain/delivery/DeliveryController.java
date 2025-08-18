@@ -25,6 +25,11 @@ public class DeliveryController {
         List<DeliveryResponseDto> response = deliveryService.getAllDelivery();
         return ApiResponse.success(200, response);
     }
+    @GetMapping("/{deliveryId}")
+    public ApiResponse<?> getDelivery(@PathVariable(name = "deliveryId") Long deliveryId){
+        DeliveryResponseDto response = deliveryService.getDelivery(deliveryId);
+        return ApiResponse.success(200, response);
+    }
 
     //주문생성시 자동으로 호출 -> message queue 활용
     @PostMapping()

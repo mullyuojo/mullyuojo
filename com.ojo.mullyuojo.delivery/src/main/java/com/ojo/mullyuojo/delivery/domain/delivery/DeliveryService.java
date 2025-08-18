@@ -57,31 +57,51 @@ public class DeliveryService {
                 .toList();
     }
 
+    @Transactional
     public DeliveryResponseDto getDelivery(Long id) {
 
-
+        String userRole = user.getUserRole();
         Delivery delivery = findById(id);
-//        //허브관리자
-//        String role = "HUB";
-//        if ( role.equals("HUB")) {
-//            //배송의 출발 허브 ID & 도착 허브 ID를 통해 허브 객체 가져오기 ( HUB FeignClient )
-//            //해당 허브의 허브 담당자 id 가져오기
-//            //본인 허브인지 확인
-//        }
-//        //허브배송관리자 ---> 소속된 허브가 없는디?...
-//        String role2 = "HUB_DELIVERY";
-//        if ( role2.equals("DELIVERY")) {
-//            //배송담당자_허브배송담당자 테이블에서 허브ID 가져오기 ( DeliveryUser FeignClient)
-//            //배송의 출발허브 ID & 도착 허브 ID와 비교
-//            //본인 허브인지 확인
-//        }
-        //업체 배송 관리자
-//        String role3 = "COM_DELIVERY";
-//        if ( role2.equals("COM_DELIVERY")) {
-//            //배송의 업체 배송 담당자와 비교
-//            //본인 담당인지 확인
-//        }
-//
+        switch (userRole) {
+            case "MASTER " -> {
+                return DeliveryResponseDto.from(delivery);
+            }
+            case "HUB" -> {
+                Long hubId = 1L;
+                //허브한테 feignClient
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
+                if (!hubIdList.contains(delivery.getOriginHubId()) || !hubIdList.contains(delivery.getDestinationHubId())) {
+                    throw new RuntimeException("접근 권한이 없습니다.");
+                }
+                return DeliveryResponseDto.from(delivery);
+            }
+            case "HUB_DELIVERY" -> {
+                Long hubDeliveryManagerId = 1L;
+                if (!Objects.equals(delivery.getHubDeliveryManagerId(), hubDeliveryManagerId)) {
+                    throw new ForbiddenException("접근 권한이 없습니다.");
+                }
+                return DeliveryResponseDto.from(delivery);
+            }
+            case "COM_DELIVERY" -> {
+                Long companyDeliveryManagerId = 1L;
+                if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), companyDeliveryManagerId)) {
+                    throw new ForbiddenException("접근 권한이 없습니다.");
+                }
+                return DeliveryResponseDto.from(delivery);
+            }
+            case "COMPANY" -> {
+                Long userId = user.getUserId();
+                //업체한테 feignClient
+                List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
+                List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
+                if (!companyIdList.contains(delivery.getDestinationCompanyId())) {
+                    throw new ForbiddenException("접근 권한이 없습니다.");
+                }
+                return DeliveryResponseDto.from(delivery);
+            }
+        }
+
 
         return DeliveryResponseDto.from(delivery);
     }
