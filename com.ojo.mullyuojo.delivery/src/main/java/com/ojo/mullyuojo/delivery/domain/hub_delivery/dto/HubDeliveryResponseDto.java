@@ -4,7 +4,6 @@ import com.ojo.mullyuojo.delivery.domain.hub_delivery.HubDelivery;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
 
 public record HubDeliveryResponseDto(
-
         Long id,
         Long deliveryId,
         HubDeliveryStatus status,
@@ -15,10 +14,8 @@ public record HubDeliveryResponseDto(
         Double actualDistance,
         Double actualTime,
         Long HubDeliveryManagerId
-
 ) {
-
-    public static HubDeliveryResponseDto from(HubDelivery hubDelivery){
+    public static HubDeliveryResponseDto from(HubDelivery hubDelivery) {
         return new HubDeliveryResponseDto(
                 hubDelivery.getId(),
                 hubDelivery.getDeliveryId(),

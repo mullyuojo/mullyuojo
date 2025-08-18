@@ -1,17 +1,34 @@
 package com.ojo.mullyuojo.delivery.domain.hub_delivery;
 
 import com.ojo.mullyuojo.delivery.domain.delivery.Delivery;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyClient;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyDto;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubClient;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubDto;
+import com.ojo.mullyuojo.delivery.domain.delivery.client.user.DeliveryUserDto;
+import com.ojo.mullyuojo.delivery.domain.hub_delivery.dto.HubDeliveryResponseDto;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
-import lombok.NoArgsConstructor;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class HubDeliveryService {
 
     private final HubDeliveryRepository hubDeliveryRepository;
+    private final DeliveryHubClient deliveryHubClient;
+    private final DeliveryCompanyClient deliveryCompanyClient;
+    private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
+
     public void createHubDeliveryByDelivery(Delivery delivery) {
 
         HubDelivery hubDelivery = new HubDelivery(
@@ -21,25 +38,96 @@ public class HubDeliveryService {
                 delivery.getDestinationHubId(),
                 10.0, //예상거리
                 10.0, //예상시간
-                1L //HubDeliveryManagerId
+                delivery.getHubDeliveryManagerId() //HubDeliveryManagerId
         );
+        hubDeliveryRepository.save(hubDelivery);
+        log.info("Hub Delivery 생성 완료 : {}, {}, hub {} -> hub {}", hubDelivery.getDeliveryId(), hubDelivery.getStatus(), hubDelivery.getOriginHubId(), hubDelivery.getDestinationHubId());
     }
 
-    public void changeStatus(Long id,HubDeliveryStatus status) {
+    public List<HubDeliveryResponseDto> getAllHubDelivery() {
+        String userRole = user.getUserRole();
+        List<HubDelivery> hubDeliveryList = new ArrayList<>();
+        switch (userRole) {
+            case "MASTER " -> hubDeliveryList = hubDeliveryRepository.findAll();
+            case "HUB" -> {
+                Long hubId = 1L;
+                //허브한테 feingClient
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
+                hubDeliveryList = hubDeliveryRepository.findAllByHubIds(hubIdList);
+            }
+            case "HUB_DELIVERY" -> {
+                Long hubDeliveryManagerId = 1L;
+                hubDeliveryList = hubDeliveryRepository.findAllByHubDeliveryManagerIdAndDeletedByIsNull(hubDeliveryManagerId);
+            }
+            case "COMPANY" -> {
+                //업체한테 feignClient
+                Long userId = user.getUserId();
+                List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
+                List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
+                hubDeliveryList = hubDeliveryRepository.findAllByDestinationCompanyIds(companyIdList);
+            }
+            default -> throw new ForbiddenException("접근 권한이 없습니다.");
+        }
+        return hubDeliveryList.stream()
+                .map(HubDeliveryResponseDto::from)
+                .toList();
+    }
 
-        HubDelivery hubDelivery = findById(id);
-        if (status.equals(HubDeliveryStatus.IN_TRANSIT_TO_HUB)){
+    public HubDeliveryResponseDto getHubDelivery(Long hubDeliveryId) {
+
+        String userRole = user.getUserRole();
+        HubDelivery hubDelivery = findById(hubDeliveryId);
+        switch (userRole) {
+            case "MASTER " -> {
+                return HubDeliveryResponseDto.from(hubDelivery);
+            }
+            case "HUB" -> {
+                Long hubId = 1L;
+                //허브한테 feignClient
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
+                if (!hubIdList.contains(hubDelivery.getOriginHubId()) || !hubIdList.contains(hubDelivery.getDestinationHubId())) {
+                    throw new RuntimeException("접근 권한이 없습니다.");
+                }
+                return HubDeliveryResponseDto.from(hubDelivery);
+            }
+            case "HUB_DELIVERY" -> {
+                Long hubDeliveryManagerId = 1L;
+                if (!Objects.equals(hubDelivery.getHubDeliveryManagerId(), hubDeliveryManagerId)) {
+                    throw new ForbiddenException("접근 권한이 없습니다.");
+                }
+                return HubDeliveryResponseDto.from(hubDelivery);
+            }
+            default -> throw new ForbiddenException("접근 권한이 없습니다.");
+        }
+    }
+
+    public void changeStatus(Long deliveryId, HubDeliveryStatus status) {
+
+        HubDelivery hubDelivery = hubDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(deliveryId);
+        if (status.equals(HubDeliveryStatus.IN_TRANSIT_TO_HUB)) {
             hubDelivery.changeStatus(HubDeliveryStatus.IN_TRANSIT_TO_HUB);
-        }
-        else if(status.equals(HubDeliveryStatus.ARRIVED_AT_DEST_HUB)){
+            hubDelivery.setDepartureTime(LocalDateTime.now());
+            log.info("Hub Delivery 상태 변경 : {}, {}", hubDelivery.getDeliveryId(), hubDelivery.getStatus());
+        } else if (status.equals(HubDeliveryStatus.ARRIVED_AT_DEST_HUB)) {
             hubDelivery.changeStatus(HubDeliveryStatus.ARRIVED_AT_DEST_HUB);
+            LocalDateTime arrivedTime = LocalDateTime.now();
+            LocalDateTime departureTime = hubDelivery.getDepartureTime();
 
+            Duration duration = Duration.between(arrivedTime, departureTime); // 초단위
+            hubDelivery.setActualTime((double) duration.getSeconds());
+            hubDelivery.setActualDistance(12345.0);
+            log.info("Hub Delivery 상태 변경 : {}, {}, {}초", hubDelivery.getDeliveryId(), hubDelivery.getStatus(), hubDelivery.getActualTime());
         }
+    }
 
+    public void deleteHubDelivery(Long hubDeliveryId) {
+        HubDelivery hubDelivery = findById(hubDeliveryId);
+        hubDelivery.softDelete(1L);
     }
 
     private HubDelivery findById(Long id) {
-        return hubDeliveryRepository.findById(id).orElseThrow();
+        return hubDeliveryRepository.findByIdAndDeletedByIsNull(id).orElseThrow(() -> new RuntimeException("해당 배송을 찾을 수 없습니다."));
     }
-
 }
