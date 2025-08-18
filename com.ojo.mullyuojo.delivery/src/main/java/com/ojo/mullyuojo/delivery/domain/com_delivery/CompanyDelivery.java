@@ -43,7 +43,7 @@ public class CompanyDelivery {
     private Double actualTime;
 
     @Column(nullable = false)
-    private Long HubDeliveryManagerId;
+    private Long companyDeliveryManagerId;
 
     private LocalDateTime departureTime;
 
@@ -54,17 +54,17 @@ public class CompanyDelivery {
     public void softDelete(Long userId){
         this.deletedBy = userId;
     }
+    public void changeStatus(CompanyDeliveryStatus status){
+        this.status = status;
+    }
 
-    public CompanyDelivery(Long id, Long deliveryId, CompanyDeliveryStatus status, Long originHubId, Long destinationCompanyId, Double estimatedDistance, Double estimatedTime, Double actualDistance, Double actualTime, Long hubDeliveryManagerId) {
-        this.id = id;
+    public CompanyDelivery(Long deliveryId, CompanyDeliveryStatus status, Long originHubId, Long destinationCompanyId, Double estimatedDistance, Double estimatedTime, Long companyDeliveryManagerId) {
         this.deliveryId = deliveryId;
         this.status = status;
         this.originHubId = originHubId;
         this.destinationCompanyId = destinationCompanyId;
         this.estimatedDistance = estimatedDistance;
         this.estimatedTime = estimatedTime;
-        this.actualDistance = actualDistance;
-        this.actualTime = actualTime;
-        HubDeliveryManagerId = hubDeliveryManagerId;
+        this.companyDeliveryManagerId = companyDeliveryManagerId;
     }
 }
