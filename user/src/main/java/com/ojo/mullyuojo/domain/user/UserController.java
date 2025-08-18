@@ -2,6 +2,7 @@ package com.ojo.mullyuojo.domain.user;
 
 
 import com.ojo.mullyuojo.domain.user.dto.UpdatePasswordDto;
+import com.ojo.mullyuojo.domain.user.dto.UpdateUserDto;
 import com.ojo.mullyuojo.domain.user.dto.UserRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +29,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers());
     }
 
-    @PatchMapping("/me")
+    @PatchMapping(value = "/me")
     public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userService.updatePassword(user.getId(), updatePasswordDto));
     }
 
     @PatchMapping("/{user_id}")
-    public ResponseEntity<?> updateUser(@PathVariable long user_id, @RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.ok(userService.updateUser(user_id,userRequestDto));
+    public ResponseEntity<?> updateUser(@PathVariable long user_id, @RequestBody UpdateUserDto updateUserDto) {
+        return ResponseEntity.ok(userService.updateUser(user_id,updateUserDto));
 
     }
 
@@ -44,9 +45,6 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable long user_id) {
         return ResponseEntity.ok(userService.deleteUser(user_id));
     }
-
-
-
 
 
 }

@@ -43,6 +43,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 잘못된 인자 값으로 요청 시 발생하는 IllegalArgumentException을 처리합니다.
+     * 예를 들어, 비밀번호 변경 시 이전 비밀번호가 틀렸을 경우 등에 사용됩니다.
+     * HTTP 상태 코드 400 Bad Request와 함께 에러 메시지를 반환합니다.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Bad Request");
+        errorResponse.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * 리소스를 찾을 수 없을 때 발생하는 NoSuchElementException을 처리합니다.
      * 예를 들어, 존재하지 않는 ID로 데이터를 조회할 때 발생할 수 있습니다.
      * HTTP 상태 코드 404 Not Found와 함께 에러 메시지를 반환합니다.

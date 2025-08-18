@@ -22,6 +22,7 @@ public class AuthService {
     @Transactional
     public AuthResponseDto signUp (AuthRequestDto authRequestDto) {
         checkUsername(authRequestDto);
+        checkSlcakId(authRequestDto);
         User user = new User(authRequestDto, passwordEncoder);
         userRepository.save(user);
         return new AuthResponseDto("회원가입이 완료되었습니다");
@@ -44,6 +45,12 @@ public class AuthService {
     private void checkUsername(AuthRequestDto authRequestDto){
         if (userRepository.findByUsername(authRequestDto.getUsername()).isPresent()) {
             throw new DuplicateUsernameException("이미 등록된 사용자가 있습니다. : " + authRequestDto.getUsername());
+        }
+    }
+
+    private void checkSlcakId(AuthRequestDto authRequestDto){
+        if (userRepository.findByUsername(authRequestDto.getSlack_id()).isPresent()) {
+            throw new DuplicateUsernameException("이미 등록된 Slack Id입니다. : " + authRequestDto.getUsername());
         }
     }
 }

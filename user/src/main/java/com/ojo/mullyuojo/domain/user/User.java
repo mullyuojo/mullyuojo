@@ -1,6 +1,7 @@
 package com.ojo.mullyuojo.domain.user;
 
 import com.ojo.mullyuojo.domain.user.dto.AuthRequestDto;
+import com.ojo.mullyuojo.domain.user.dto.UpdateUserDto;
 import com.ojo.mullyuojo.domain.user.dto.UserRequestDto;
 import com.ojo.mullyuojo.domain.user.enums.UserRole;
 import jakarta.persistence.*;
@@ -43,9 +44,19 @@ public class User implements UserDetails {
         this.role = authRequestDto.getRole();
     }
 
-    public void update(UserRequestDto requestDto, PasswordEncoder passwordEncoder) {
-        this.username = requestDto.getUsername();
-        this.slack_id = requestDto.getSlack_id();
+    public void update(UpdateUserDto requestDto, PasswordEncoder passwordEncoder) {
+
+        if (requestDto.getUsername() != null && !requestDto.getUsername().isBlank()) {
+            this.username = requestDto.getUsername();
+        }
+
+        if (requestDto.getSlack_id() != null) {
+            this.slack_id = requestDto.getSlack_id();
+        }
+
+        if (requestDto.getRole() != null) {
+            this.role = requestDto.getRole();
+        }
 
         // DTO에 새로운 비밀번호가 존재할 경우에만 암호화하여 변경
         if (requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()) {
