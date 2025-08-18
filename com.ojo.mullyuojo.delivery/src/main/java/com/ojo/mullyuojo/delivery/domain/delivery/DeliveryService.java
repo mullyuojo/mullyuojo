@@ -22,19 +22,36 @@ public class DeliveryService {
     private final CompanyDeliveryService companyDeliveryService;
     private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
 
+    @Transactional
     public List<DeliveryResponseDto> getAllDelivery() {
 
-
-
-        //Master
-        List<Delivery> deliveryList = deliveryRepository.findAll();
-
-        //Hub Manager
-        //List<Delivery> deliveryList = deliveryRepository.findAllByHubManagerId();
-
-        //Delivery Manager
-        //List<Delivery> deliveryList = deliveryRepository.findAllByCompanyDeliveryManagerId();
-
+        String userRole = user.getUserRole();
+        List<Delivery> deliveryList = new ArrayList<>();
+        switch (userRole) {
+            case "MASTER " -> deliveryList = deliveryRepository.findAll();
+            case "HUB" -> {
+                Long hubId = 1L;
+                //허브한테 feingClient
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
+                deliveryList = deliveryRepository.findAllByHubIds(hubIdList);
+            }
+            case "HUB_DELIVERY" -> {
+                Long hubDeliveryManagerId = 1L;
+                deliveryList = deliveryRepository.findAllByHubDeliveryManagerIdAndDeletedByIsNull(hubDeliveryManagerId);
+            }
+            case "COM_DELIVERY" -> {
+                Long companyDeliveryManagerId = 1L;
+                deliveryList = deliveryRepository.findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(companyDeliveryManagerId);
+            }
+            case "COMPANY" -> {
+                //업체한테 feignClient
+                Long userId = user.getUserId();
+                List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
+                List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
+                deliveryList = deliveryRepository.findAllByDestinationCompanyIds(companyIdList);
+            }
+        }
         return deliveryList.stream()
                 .map(DeliveryResponseDto::from)
                 .toList();
@@ -105,10 +122,8 @@ public class DeliveryService {
         delivery.softDelete(userId);
     }
 
-    private Delivery findById(Long id){
-        Delivery delivery = deliveryRepository.findById(id).orElseThrow(() ->  new RuntimeException("해당 배송을 찾을 수 없습니다."));
-        if ( delivery.getDeletedBy() == null) { return delivery; }
-        else { throw new RuntimeException("삭제된 배송은 접근할 수 없습니다.");}
+    private Delivery findById(Long id) {
+        return deliveryRepository.findByIdAndDeletedByIsNull(id).orElseThrow(() -> new RuntimeException("해당 배송을 찾을 수 없습니다."));
     }
 
 
