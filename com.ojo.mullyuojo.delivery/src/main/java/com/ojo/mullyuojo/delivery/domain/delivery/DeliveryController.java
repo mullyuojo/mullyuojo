@@ -38,9 +38,15 @@ public class DeliveryController {
         return ApiResponse.success(201, "배송 생성 완료");
     }
 
-    @DeleteMapping("/{delivery_id}")
-    public ApiResponse<?> deleteDelivery(@PathVariable(name = "delivery_id") Long delivery_id){
-        deliveryService.deleteDelivery(delivery_id);
+    @PatchMapping("/{deliveryId}")
+    public ApiResponse<?> updateDelivery(@PathVariable(name = "deliveryId") Long deliveryId, @RequestBody DeliveryUpdateRequestDto requestDto){
+        deliveryService.updateDelivery(deliveryId, requestDto);
+        return ApiResponse.success(200, "배송 생성 완료");
+    }
+
+    @DeleteMapping("/{deliveryId}")
+    public ApiResponse<?> deleteDelivery(@PathVariable(name = "deliveryId") Long deliveryId){
+        deliveryService.deleteDelivery(deliveryId);
         return ApiResponse.success(200, "배송 삭제 완료");
     }
 

@@ -139,23 +139,42 @@ public class DeliveryService {
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
-    public void changeStatus(Long id, DeliveryStatus status) {
+    public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto) {
 
+        if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB") && !user.getUserRole().equals("HUB_DELIVERY") && !user.getUserRole().equals("COM_DELIVERY")) {
+            throw new ForbiddenException("수정 권한이 없습니다.");
+        }
         Delivery delivery = findById(id);
-        if (status.equals(DeliveryStatus.IN_TRANSIT_TO_HUB)){
-            delivery.changeStatus(DeliveryStatus.IN_TRANSIT_TO_HUB);
-        } else if(status.equals(DeliveryStatus.ARRIVED_AT_DEST_HUB)){
-            delivery.changeStatus(DeliveryStatus.ARRIVED_AT_DEST_HUB);
-        } else if(status.equals(DeliveryStatus.OUT_FOR_DELIVERY)){
-            delivery.changeStatus(DeliveryStatus.OUT_FOR_DELIVERY);
-        } else if(status.equals(DeliveryStatus.IN_TRANSIT_TO_COMPANY)){
-            delivery.changeStatus(DeliveryStatus.IN_TRANSIT_TO_COMPANY);
-        } else if(status.equals(DeliveryStatus.DELIVERED)){
-            delivery.changeStatus(DeliveryStatus.DELIVERED);
+        delivery.update(
+                requestDto.orderId(),
+                requestDto.deliveryStatus(),
+                requestDto.originHubId(),
+                requestDto.destinationHubId(),
+                requestDto.destinationCompanyId(),
+                requestDto.companyManagerId(),
+                requestDto.companyManagerSlackId(),
+                requestDto.hubDeliveryManagerId(),
+                requestDto.companyDeliveryManagerId());
+
+        //배송이 IN_TRANSIT_TO_HUB일 때 허브 배송 경로 기록 생성
+        if (requestDto.deliveryStatus().equals(DeliveryStatus.IN_TRANSIT_TO_HUB)) {
+            hubDeliveryService.changeStatus(delivery.getId(), HubDeliveryStatus.IN_TRANSIT_TO_HUB);
+        } else if (requestDto.deliveryStatus().equals(DeliveryStatus.ARRIVED_AT_DEST_HUB)) {
+            hubDeliveryService.changeStatus(delivery.getId(), HubDeliveryStatus.ARRIVED_AT_DEST_HUB);
+        } else if (requestDto.deliveryStatus().equals(DeliveryStatus.OUT_FOR_DELIVERY)) {
+            //배송이 OUT_FOR_DELIVERY일 때 허브 배송 경로 기록 변경 및 업체 배송 기록 생성
+            companyDeliveryService.createCompanyDeliveryByDelivery(delivery);
+        } else if (requestDto.deliveryStatus().equals(DeliveryStatus.IN_TRANSIT_TO_COMPANY)) {
+            companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY);
+        } else if (requestDto.deliveryStatus().equals(DeliveryStatus.DELIVERED)) {
+            companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.DELIVERED);
         }
     }
 
     public void deleteDelivery(Long id) {
+        if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB")) {
+            throw new ForbiddenException("삭제 권한이 없습니다.");
+        }
         Long userId = user.getUserId();
         Delivery delivery = findById(id);
         delivery.softDelete(userId);
