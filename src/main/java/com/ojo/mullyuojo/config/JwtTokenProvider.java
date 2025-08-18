@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,11 +20,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
     private final UserService userService;
+
+    public JwtTokenProvider(JwtProperties jwtProperties, @Lazy UserService userService) {
+        this.jwtProperties = jwtProperties;
+        this.userService = userService;
+    }
+
 
     private String issuer;
     private SecretKey key;
@@ -65,7 +71,7 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         Long user_id = Long.valueOf(this.getUserPk((token)));
-        UserDetails userDetails = userService.loadUserById(user_id);z
+        UserDetails userDetails = userService.loadUserById(user_id);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
