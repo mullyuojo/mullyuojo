@@ -12,10 +12,12 @@ import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,6 +30,7 @@ public class CompanyDeliveryService {
     private final DeliveryCompanyClient deliveryCompanyClient;
     private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
 
+    @Transactional
     public void createCompanyDeliveryByDelivery(Delivery delivery) {
         CompanyDelivery companyDelivery = new CompanyDelivery(
                 delivery.getId(),
@@ -40,30 +43,9 @@ public class CompanyDeliveryService {
         );
         companyDeliveryRepository.save(companyDelivery);
         log.info("Company Delivery 생성 완료 : {}, {}, hub {} -> com {}", companyDelivery.getDeliveryId(), companyDelivery.getStatus(), companyDelivery.getOriginHubId(), companyDelivery.getDestinationCompanyId());
-
     }
 
-    public void changeStatus(Long deliveryId, CompanyDeliveryStatus status) {
-
-        CompanyDelivery companyDelivery = companyDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(deliveryId);
-
-        if (status.equals(CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY)) {
-            companyDelivery.changeStatus(CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY);
-            companyDelivery.setDepartureTime(LocalDateTime.now());
-            log.info("Company Delivery 상태 변경 : {}, {}", companyDelivery.getDeliveryId(), companyDelivery.getStatus());
-
-        } else if (status.equals(CompanyDeliveryStatus.DELIVERED)) {
-            companyDelivery.changeStatus(CompanyDeliveryStatus.DELIVERED);
-            LocalDateTime arrivedTime = LocalDateTime.now();
-            LocalDateTime departureTime = companyDelivery.getDepartureTime();
-
-            Duration duration = Duration.between(arrivedTime, departureTime); // 초단위
-            companyDelivery.setActualTime((double) duration.getSeconds());
-            companyDelivery.setActualDistance(12345.0);
-            log.info("Company Delivery 상태 변경 : {}, {}, {}초", companyDelivery.getDeliveryId(), companyDelivery.getStatus(), companyDelivery.getActualTime());
-        }
-    }
-
+    @Transactional
     public List<CompanyDeliveryResponseDto> getAllCompanyDelivery() {
 
         String userRole = user.getUserRole();
@@ -121,6 +103,39 @@ public class CompanyDeliveryService {
             }
             default -> throw new ForbiddenException("접근 권한이 없습니다.");
         }
+    }
+
+    @Transactional
+    public void changeStatus(Long deliveryId, CompanyDeliveryStatus status) {
+
+        CompanyDelivery companyDelivery = companyDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(deliveryId);
+
+        if (status.equals(CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY)) {
+            companyDelivery.changeStatus(CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY);
+            companyDelivery.setDepartureTime(LocalDateTime.now());
+            log.info("Company Delivery 상태 변경 : {}, {}", companyDelivery.getDeliveryId(), companyDelivery.getStatus());
+
+        } else if (status.equals(CompanyDeliveryStatus.DELIVERED)) {
+            companyDelivery.changeStatus(CompanyDeliveryStatus.DELIVERED);
+            LocalDateTime arrivedTime = LocalDateTime.now();
+            LocalDateTime departureTime = companyDelivery.getDepartureTime();
+
+            Duration duration = Duration.between(arrivedTime, departureTime); // 초단위
+            companyDelivery.setActualTime((double) duration.getSeconds());
+            companyDelivery.setActualDistance(12345.0);
+            log.info("Company Delivery 상태 변경 : {}, {}, {}초", companyDelivery.getDeliveryId(), companyDelivery.getStatus(), companyDelivery.getActualTime());
+        }
+    }
+
+    @Transactional
+    public void updateCompanyDelivery(Delivery delivery) {
+        CompanyDelivery companyDelivery = companyDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(delivery.getId());
+        companyDelivery.update(delivery);
+    }
+
+    public void deleteCompanyDelivery(Long hubDeliveryId) {
+        CompanyDelivery companyDelivery = findById(hubDeliveryId);
+        companyDelivery.softDelete(1L);
     }
 
     private CompanyDelivery findById(Long id) {

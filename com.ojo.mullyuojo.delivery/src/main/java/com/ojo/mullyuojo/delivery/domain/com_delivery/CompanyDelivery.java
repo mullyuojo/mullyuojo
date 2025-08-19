@@ -1,7 +1,7 @@
 package com.ojo.mullyuojo.delivery.domain.com_delivery;
 
 import com.ojo.mullyuojo.delivery.domain.com_delivery.status.CompanyDeliveryStatus;
-import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
+import com.ojo.mullyuojo.delivery.domain.delivery.Delivery;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -56,6 +56,12 @@ public class CompanyDelivery {
     }
     public void changeStatus(CompanyDeliveryStatus status){
         this.status = status;
+    }
+
+    public void update(Delivery delivery) {
+        if (!this.originHubId.equals(delivery.getOriginHubId())) { this.originHubId = delivery.getOriginHubId();}
+        if (!this.destinationCompanyId.equals(delivery.getDestinationCompanyId())) { this.destinationCompanyId = delivery.getDestinationCompanyId();}
+        if (!this.companyDeliveryManagerId.equals(delivery.getCompanyDeliveryManagerId())) { this.companyDeliveryManagerId = delivery.getCompanyDeliveryManagerId();}
     }
 
     public CompanyDelivery(Long deliveryId, CompanyDeliveryStatus status, Long originHubId, Long destinationCompanyId, Double estimatedDistance, Double estimatedTime, Long companyDeliveryManagerId) {
