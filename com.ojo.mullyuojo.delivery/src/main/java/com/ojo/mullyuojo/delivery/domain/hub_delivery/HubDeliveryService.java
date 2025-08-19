@@ -12,6 +12,7 @@ import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class HubDeliveryService {
     private final DeliveryCompanyClient deliveryCompanyClient;
     private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
 
+    @Transactional
     public void createHubDeliveryByDelivery(Delivery delivery) {
 
         HubDelivery hubDelivery = new HubDelivery(
@@ -44,6 +46,7 @@ public class HubDeliveryService {
         log.info("Hub Delivery 생성 완료 : {}, {}, hub {} -> hub {}", hubDelivery.getDeliveryId(), hubDelivery.getStatus(), hubDelivery.getOriginHubId(), hubDelivery.getDestinationHubId());
     }
 
+    @Transactional
     public List<HubDeliveryResponseDto> getAllHubDelivery() {
         String userRole = user.getUserRole();
         List<HubDelivery> hubDeliveryList = new ArrayList<>();
@@ -74,6 +77,7 @@ public class HubDeliveryService {
                 .toList();
     }
 
+    @Transactional
     public HubDeliveryResponseDto getHubDelivery(Long hubDeliveryId) {
 
         String userRole = user.getUserRole();
@@ -103,6 +107,7 @@ public class HubDeliveryService {
         }
     }
 
+    @Transactional
     public void changeStatus(Long deliveryId, HubDeliveryStatus status) {
 
         HubDelivery hubDelivery = hubDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(deliveryId);
@@ -122,6 +127,12 @@ public class HubDeliveryService {
         }
     }
 
+    @Transactional
+    public void updateHubDelivery(Delivery delivery) {
+        HubDelivery hubDelivery = hubDeliveryRepository.findByDeliveryIdAndDeletedByIsNull(delivery.getId());
+        hubDelivery.update(delivery);
+
+    }
     public void deleteHubDelivery(Long hubDeliveryId) {
         HubDelivery hubDelivery = findById(hubDeliveryId);
         hubDelivery.softDelete(1L);

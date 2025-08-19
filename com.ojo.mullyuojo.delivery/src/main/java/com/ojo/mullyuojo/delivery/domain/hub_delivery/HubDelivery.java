@@ -1,6 +1,6 @@
 package com.ojo.mullyuojo.delivery.domain.hub_delivery;
 
-import com.ojo.mullyuojo.delivery.domain.delivery.status.DeliveryStatus;
+import com.ojo.mullyuojo.delivery.domain.delivery.Delivery;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
 @Getter
 @Data
 @Entity(name = "hub_delivery_tb")
@@ -43,7 +44,7 @@ public class HubDelivery {
     private Double actualTime;
 
     @Column(nullable = false)
-    private Long HubDeliveryManagerId;
+    private Long hubDeliveryManagerId;
 
     private LocalDateTime departureTime;
 
@@ -51,7 +52,7 @@ public class HubDelivery {
 
     private Long deletedBy;
 
-    public void softDelete(Long userId){
+    public void softDelete(Long userId) {
         this.deletedBy = userId;
     }
 
@@ -59,13 +60,25 @@ public class HubDelivery {
         this.status = status;
     }
 
-    public HubDelivery( Long deliveryId, HubDeliveryStatus status, Long originHubId, Long destinationHubId, Double estimatedDistance, Double estimatedTime, Long hubDeliveryManagerId) {
+    public void update(Delivery delivery) {
+        if (!this.originHubId.equals(delivery.getOriginHubId())) {
+            this.originHubId = delivery.getOriginHubId();
+        }
+        if (!this.destinationHubId.equals(delivery.getDestinationHubId())) {
+            this.destinationHubId = delivery.getDestinationHubId();
+        }
+        if (!this.hubDeliveryManagerId.equals(delivery.getHubDeliveryManagerId())) {
+            this.hubDeliveryManagerId = delivery.getHubDeliveryManagerId();
+        }
+    }
+
+    public HubDelivery(Long deliveryId, HubDeliveryStatus status, Long originHubId, Long destinationHubId, Double estimatedDistance, Double estimatedTime, Long hubDeliveryManagerId) {
         this.deliveryId = deliveryId;
         this.status = status;
         this.originHubId = originHubId;
         this.destinationHubId = destinationHubId;
         this.estimatedDistance = estimatedDistance;
         this.estimatedTime = estimatedTime;
-        this.HubDeliveryManagerId = hubDeliveryManagerId;
+        this.hubDeliveryManagerId = hubDeliveryManagerId;
     }
 }
