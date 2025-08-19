@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,18 +34,26 @@ public class DeliveryService {
     private final CompanyDeliveryService companyDeliveryService;
     private final DeliveryHubClient deliveryHubClient;
     private final DeliveryCompanyClient deliveryCompanyClient;
-    private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
-
+    private final List<DeliveryUserDto> users = new ArrayList<>(
+            Arrays.asList(
+                    new DeliveryUserDto(1L, "MASTER"),
+                    new DeliveryUserDto(2L, "HUB"),
+                    new DeliveryUserDto(3L, "HUB_DELIVERY"),
+                    new DeliveryUserDto(4L, "COM_DELIVERY"),
+                    new DeliveryUserDto(5L, "COMPANY")
+            )
+    );
     @Transactional
-    public List<DeliveryResponseDto> getAllDelivery() {
+    public List<DeliveryResponseDto> getAllDelivery(Long userId) {
 
+        DeliveryUserDto user = users.get(Math.toIntExact(userId));
         String userRole = user.getUserRole();
         List<Delivery> deliveryList = new ArrayList<>();
         switch (userRole) {
             case "MASTER " -> deliveryList = deliveryRepository.findAll();
             case "HUB" -> {
                 Long hubId = 1L;
-                //허브한테 feingClient
+                //허브한테 feignClient
                 List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
                 deliveryList = deliveryRepository.findAllByHubIds(hubIdList);
@@ -59,7 +68,6 @@ public class DeliveryService {
             }
             case "COMPANY" -> {
                 //업체한테 feignClient
-                Long userId = user.getUserId();
                 List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
                 List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
                 deliveryList = deliveryRepository.findAllByDestinationCompanyIds(companyIdList);
@@ -71,8 +79,8 @@ public class DeliveryService {
     }
 
     @Transactional
-    public DeliveryResponseDto getDelivery(Long id) {
-
+    public DeliveryResponseDto getDelivery(Long id, Long userId) {
+        DeliveryUserDto user = users.get(Math.toIntExact(userId));
         String userRole = user.getUserRole();
         Delivery delivery = findById(id);
         switch (userRole) {
@@ -104,7 +112,6 @@ public class DeliveryService {
                 return DeliveryResponseDto.from(delivery);
             }
             case "COMPANY" -> {
-                Long userId = user.getUserId();
                 //업체한테 feignClient
                 List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
                 List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
@@ -120,8 +127,8 @@ public class DeliveryService {
     }
 
     @Transactional
-    public void createDelivery(DeliveryRequestDto requestDto) {
-
+    public void createDelivery(DeliveryRequestDto requestDto, Long userId) {
+        DeliveryUserDto user = users.get(Math.toIntExact(userId));
         if (!user.getUserRole().equals("MASTER")) {
             throw new ForbiddenException("생성 권한이 없습니다.");
         }
@@ -135,13 +142,13 @@ public class DeliveryService {
                 requestDto.hubDeliveryManagerId(),
                 requestDto.companyDeliveryManagerId());
 
-
+        deliveryRepository.save(delivery);
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
     @Transactional
-    public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto) {
-
+    public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto, Long userId) {
+        DeliveryUserDto user = users.get(Math.toIntExact(userId));
         if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB") && !user.getUserRole().equals("HUB_DELIVERY") && !user.getUserRole().equals("COM_DELIVERY")) {
             throw new ForbiddenException("수정 권한이 없습니다.");
         }
@@ -160,26 +167,29 @@ public class DeliveryService {
         //배송이 IN_TRANSIT_TO_HUB일 때 허브 배송 경로 기록 생성
         if (requestDto.deliveryStatus().equals(DeliveryStatus.IN_TRANSIT_TO_HUB)) {
             hubDeliveryService.changeStatus(delivery.getId(), HubDeliveryStatus.IN_TRANSIT_TO_HUB);
+            hubDeliveryService.updateHubDelivery(delivery);
         } else if (requestDto.deliveryStatus().equals(DeliveryStatus.ARRIVED_AT_DEST_HUB)) {
             hubDeliveryService.changeStatus(delivery.getId(), HubDeliveryStatus.ARRIVED_AT_DEST_HUB);
+            hubDeliveryService.updateHubDelivery(delivery);
         } else if (requestDto.deliveryStatus().equals(DeliveryStatus.OUT_FOR_DELIVERY)) {
             //배송이 OUT_FOR_DELIVERY일 때 허브 배송 경로 기록 변경 및 업체 배송 기록 생성
             companyDeliveryService.createCompanyDeliveryByDelivery(delivery);
+            companyDeliveryService.updateCompanyDelivery(delivery);
         } else if (requestDto.deliveryStatus().equals(DeliveryStatus.IN_TRANSIT_TO_COMPANY)) {
             companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.IN_TRANSIT_TO_COMPANY);
+            companyDeliveryService.updateCompanyDelivery(delivery);
         } else if (requestDto.deliveryStatus().equals(DeliveryStatus.DELIVERED)) {
             companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.DELIVERED);
+            companyDeliveryService.updateCompanyDelivery(delivery);
         }
-        hubDeliveryService.updateHubDelivery(delivery);
-        companyDeliveryService.updateCompanyDelivery(delivery);
 
     }
 
-    public void deleteDelivery(Long id) {
+    public void deleteDelivery(Long id, Long userId) {
+        DeliveryUserDto user = users.get(Math.toIntExact(userId));
         if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB")) {
             throw new ForbiddenException("삭제 권한이 없습니다.");
         }
-        Long userId = user.getUserId();
         Delivery delivery = findById(id);
         delivery.softDelete(userId);
     }
