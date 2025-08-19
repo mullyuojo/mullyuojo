@@ -22,6 +22,7 @@ public class CompanyDelivery {
     private Long deliveryId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CompanyDeliveryStatus status;
 
     @Column(nullable = false)
@@ -59,9 +60,10 @@ public class CompanyDelivery {
     }
 
     public void update(Delivery delivery) {
-        if (!this.originHubId.equals(delivery.getOriginHubId())) { this.originHubId = delivery.getOriginHubId();}
-        if (!this.destinationCompanyId.equals(delivery.getDestinationCompanyId())) { this.destinationCompanyId = delivery.getDestinationCompanyId();}
-        if (!this.companyDeliveryManagerId.equals(delivery.getCompanyDeliveryManagerId())) { this.companyDeliveryManagerId = delivery.getCompanyDeliveryManagerId();}
+        this.deliveryId = delivery.getId();
+        this.originHubId = delivery.getOriginHubId();
+        this.destinationCompanyId = delivery.getDestinationCompanyId();
+        this.companyDeliveryManagerId = delivery.getCompanyDeliveryManagerId();
     }
 
     public CompanyDelivery(Long deliveryId, CompanyDeliveryStatus status, Long originHubId, Long destinationCompanyId, Double estimatedDistance, Double estimatedTime, Long companyDeliveryManagerId) {

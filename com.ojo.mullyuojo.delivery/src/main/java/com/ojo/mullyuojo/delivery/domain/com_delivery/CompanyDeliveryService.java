@@ -51,7 +51,7 @@ public class CompanyDeliveryService {
         String userRole = user.getUserRole();
         List<CompanyDelivery> companyDeliveryList = new ArrayList<>();
         switch (userRole) {
-            case "MASTER " -> companyDeliveryList = companyDeliveryRepository.findAll();
+            case "MASTER" -> companyDeliveryList = companyDeliveryRepository.findAll();
             case "HUB" -> {
                 Long hubId = 1L;
                 //허브한테 feingClient
@@ -120,7 +120,7 @@ public class CompanyDeliveryService {
             LocalDateTime arrivedTime = LocalDateTime.now();
             LocalDateTime departureTime = companyDelivery.getDepartureTime();
 
-            Duration duration = Duration.between(arrivedTime, departureTime); // 초단위
+            Duration duration = Duration.between( departureTime, arrivedTime); // 초단위
             companyDelivery.setActualTime((double) duration.getSeconds());
             companyDelivery.setActualDistance(12345.0);
             log.info("Company Delivery 상태 변경 : {}, {}, {}초", companyDelivery.getDeliveryId(), companyDelivery.getStatus(), companyDelivery.getActualTime());

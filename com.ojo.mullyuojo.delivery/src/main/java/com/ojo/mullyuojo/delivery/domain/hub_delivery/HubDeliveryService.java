@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,9 +48,9 @@ public class HubDeliveryService {
     @Transactional
     public List<HubDeliveryResponseDto> getAllHubDelivery() {
         String userRole = user.getUserRole();
-        List<HubDelivery> hubDeliveryList = new ArrayList<>();
+        List<HubDelivery> hubDeliveryList;
         switch (userRole) {
-            case "MASTER " -> hubDeliveryList = hubDeliveryRepository.findAll();
+            case "MASTER" -> hubDeliveryList = hubDeliveryRepository.findAll();
             case "HUB" -> {
                 Long hubId = 1L;
                 //허브한테 feingClient

@@ -23,6 +23,7 @@ public class HubDelivery {
     private Long deliveryId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private HubDeliveryStatus status;
 
     @Column(nullable = false)
@@ -61,15 +62,10 @@ public class HubDelivery {
     }
 
     public void update(Delivery delivery) {
-        if (!this.originHubId.equals(delivery.getOriginHubId())) {
-            this.originHubId = delivery.getOriginHubId();
-        }
-        if (!this.destinationHubId.equals(delivery.getDestinationHubId())) {
-            this.destinationHubId = delivery.getDestinationHubId();
-        }
-        if (!this.hubDeliveryManagerId.equals(delivery.getHubDeliveryManagerId())) {
-            this.hubDeliveryManagerId = delivery.getHubDeliveryManagerId();
-        }
+        this.deliveryId = delivery.getId();
+        this.originHubId = delivery.getOriginHubId();
+        this.destinationHubId = delivery.getDestinationHubId();
+        this.hubDeliveryManagerId = delivery.getHubDeliveryManagerId();
     }
 
     public HubDelivery(Long deliveryId, HubDeliveryStatus status, Long originHubId, Long destinationHubId, Double estimatedDistance, Double estimatedTime, Long hubDeliveryManagerId) {

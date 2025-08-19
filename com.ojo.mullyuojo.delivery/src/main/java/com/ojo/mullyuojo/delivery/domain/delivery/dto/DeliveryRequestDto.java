@@ -10,7 +10,6 @@ public record DeliveryRequestDto(
         Long destinationHubId,
         @NotNull
         Long orderId,
-        @NotNull
         DeliveryStatus deliveryStatus,
         @NotNull
         Long destinationCompanyId,

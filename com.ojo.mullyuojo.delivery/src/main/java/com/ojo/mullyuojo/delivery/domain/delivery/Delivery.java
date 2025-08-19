@@ -21,6 +21,7 @@ public class Delivery {
     private Long orderId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
 
     @Column(nullable = false)
