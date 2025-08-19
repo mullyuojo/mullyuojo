@@ -139,6 +139,7 @@ public class DeliveryService {
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
+    @Transactional
     public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto) {
 
         if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB") && !user.getUserRole().equals("HUB_DELIVERY") && !user.getUserRole().equals("COM_DELIVERY")) {
@@ -169,6 +170,9 @@ public class DeliveryService {
         } else if (requestDto.deliveryStatus().equals(DeliveryStatus.DELIVERED)) {
             companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.DELIVERED);
         }
+        hubDeliveryService.updateHubDelivery(delivery);
+        companyDeliveryService.updateCompanyDelivery(delivery);
+
     }
 
     public void deleteDelivery(Long id) {
