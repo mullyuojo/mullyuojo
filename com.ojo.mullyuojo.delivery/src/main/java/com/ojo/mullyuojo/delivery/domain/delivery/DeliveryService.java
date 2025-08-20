@@ -11,6 +11,7 @@ import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryResponseDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryUpdateRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.status.DeliveryStatus;
+import com.ojo.mullyuojo.delivery.domain.delivery_user.CompanyDeliveryUserService;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.HubDeliveryService;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
 import jakarta.ws.rs.ForbiddenException;
@@ -34,6 +35,7 @@ public class DeliveryService {
     private final CompanyDeliveryService companyDeliveryService;
     private final DeliveryHubClient deliveryHubClient;
     private final DeliveryCompanyClient deliveryCompanyClient;
+    private final CompanyDeliveryUserService companyDeliveryUserService;
     private final List<DeliveryUserDto> users = new ArrayList<>(
             Arrays.asList(
                     new DeliveryUserDto(1L, "MASTER"),
@@ -132,6 +134,9 @@ public class DeliveryService {
         if (!user.getUserRole().equals("MASTER")) {
             throw new ForbiddenException("생성 권한이 없습니다.");
         }
+
+        Long deliveryUserId = companyDeliveryUserService.findNextUserInHub(requestDto.destinationHubId()); // 배송 시퀀스에 따라 배정되는 배송 담당자
+
         Delivery delivery = new Delivery(requestDto.orderId(),
                 requestDto.deliveryStatus(),
                 requestDto.originHubId(),
@@ -140,7 +145,8 @@ public class DeliveryService {
                 requestDto.companyManagerId(),
                 requestDto.companyManagerSlackId(),
                 requestDto.hubDeliveryManagerId(),
-                requestDto.companyDeliveryManagerId());
+                deliveryUserId
+        );
 
         deliveryRepository.save(delivery);
         hubDeliveryService.createHubDeliveryByDelivery(delivery);

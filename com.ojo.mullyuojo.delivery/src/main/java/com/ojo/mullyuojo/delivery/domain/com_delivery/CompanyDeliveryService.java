@@ -37,8 +37,8 @@ public class CompanyDeliveryService {
                 CompanyDeliveryStatus.OUT_FOR_DELIVERY,
                 delivery.getOriginHubId(),
                 delivery.getDestinationCompanyId(),
-                10.0, //예상 거리
-                60.0, // 예상 시간
+                19.8, //예상 거리 ( km )
+                1.2, // 예상 시간 ( hour )
                 delivery.getCompanyDeliveryManagerId()
         );
         companyDeliveryRepository.save(companyDelivery);

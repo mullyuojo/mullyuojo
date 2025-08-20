@@ -14,11 +14,11 @@ public interface CompanyDeliveryRepository extends JpaRepository<CompanyDelivery
 
     Optional<CompanyDelivery> findByIdAndDeletedByIsNull(Long id);
 
-    @Query("select d from com_delivery_tb d where d.originHubId in :hubIds and d.deletedBy = null")
+    @Query("select d from com_delivery_tb d where d.originHubId in :hubIds and d.deletedBy is null")
     List<CompanyDelivery> findAllByHubIds(@Param("hubIds") List<Long> hubIdList);
 
     List<CompanyDelivery> findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(Long companyDeliveryManagerId);
 
-    @Query("select d from com_delivery_tb d where d.destinationCompanyId in :companyIdList and d.deletedBy = null")
+    @Query("select d from com_delivery_tb d where d.destinationCompanyId in :companyIdList and d.deletedBy is null")
     List<CompanyDelivery> findAllByDestinationCompanyIds(@Param("companyIdList") List<Long> companyIdList);
 }
