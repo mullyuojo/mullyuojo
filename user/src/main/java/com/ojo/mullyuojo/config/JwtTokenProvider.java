@@ -1,6 +1,7 @@
 package com.ojo.mullyuojo.config;
 
 import com.ojo.mullyuojo.domain.user.UserService;
+import com.ojo.mullyuojo.domain.user.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -45,11 +46,11 @@ public class JwtTokenProvider {
     }
 
 
-    public String createAccessToken(String user_id) {
+    public String createAccessToken(String user_id, UserRole.UserRoles role) {
 
         return Jwts.builder()
                 .claim("user_id", user_id)
-                .claim("role", "ADMIN")
+                .claim("role", "ROLE_" + role)
                 .issuer(issuer)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMilisec))

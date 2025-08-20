@@ -18,6 +18,11 @@ public class UserController {
 
     private final UserService userService;
 
+    @PreAuthorize("hasRole('HUB_MANAGER')")
+    @GetMapping("/test")
+    public String test(@RequestHeader("X-USER-ID") Long user_Id,@RequestHeader("X-USER-ROLE") String role) {
+        return user_Id.toString() + role;
+    }
 
     @GetMapping("/{user_id}")
     public ResponseEntity<?> getUserById(@PathVariable long user_id) {
@@ -30,14 +35,16 @@ public class UserController {
     }
 
     @PatchMapping(value = "/me")
-    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(userService.updatePassword(user.getId(), updatePasswordDto));
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto, Authentication authentication, @RequestHeader("X-USER-ID") Long user_Id) {
+        return ResponseEntity.ok(userService.updatePassword(user_Id, updatePasswordDto));
     }
 
     @PatchMapping("/{user_id}")
-    public ResponseEntity<?> updateUser(@PathVariable long user_id, @RequestBody UpdateUserDto updateUserDto) {
-        return ResponseEntity.ok(userService.updateUser(user_id,updateUserDto));
+    public ResponseEntity<?> updateUser(@PathVariable long user_id, @RequestBody UpdateUserDto updateUserDto,@RequestHeader("X-USER-ROLE") String role) {
+        if(role.equals("ROLE_MASTER")) {
+            return ResponseEntity.ok(userService.updateUser(user_id,updateUserDto));
+        }
+        return null;
 
     }
 

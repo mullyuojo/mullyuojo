@@ -1,7 +1,9 @@
 package com.ojo.mullyuojo.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     /**
@@ -66,6 +69,19 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", "Not Found");
         errorResponse.put("message", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Spring Security에서 발생하는 접근 거부 예외(AccessDeniedException)를 처리합니다.
+     * 인증은 되었으나 필요한 권한이 없을 때 발생합니다.
+     * HTTP 상태 코드 403 Forbidden과 함께 에러 메시지를 반환합니다.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Forbidden");
+        errorResponse.put("message", "해당 리소스에 접근할 권한이 없습니다.");
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     /**

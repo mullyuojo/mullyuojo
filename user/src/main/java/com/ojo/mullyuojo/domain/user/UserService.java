@@ -39,14 +39,13 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(user_id).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + user_id));
     }
 
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('MASTER')")
+    @PreAuthorize("authentication.principal == #user_id.toString() or hasRole('MASTER')")
     public UserResponseDto getUserById(long user_id) {
         User user = findUser(user_id);
         return new UserResponseDto(user);
 
     }
-
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('MASTER')")
+    @PreAuthorize("hasRole('MASTER')")
     public List<UserResponseDto> getUsers() {
         return userRepository.findAll()
                 .stream()
@@ -55,9 +54,9 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('MASTER')")
-    public MessageResponseDto updatePassword(Long userId, UpdatePasswordDto updatePasswordDto) {
-        User user = findUser(userId);
+    @PreAuthorize("authentication.principal == #user_id.toString() or hasRole('MASTER')")
+    public MessageResponseDto updatePassword(Long user_id, UpdatePasswordDto updatePasswordDto) {
+        User user = findUser(user_id);
 
         if (!passwordEncoder.matches(updatePasswordDto.getOldPassword(), user.getPassword())) {
             throw new IllegalArgumentException("현재 비밀번호와 일치하지 않습니다");

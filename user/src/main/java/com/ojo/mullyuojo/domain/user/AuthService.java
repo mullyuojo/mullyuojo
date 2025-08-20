@@ -3,6 +3,7 @@ package com.ojo.mullyuojo.domain.user;
 import com.ojo.mullyuojo.config.JwtTokenProvider;
 import com.ojo.mullyuojo.domain.user.dto.AuthRequestDto;
 import com.ojo.mullyuojo.domain.user.dto.AuthResponseDto;
+import com.ojo.mullyuojo.domain.user.enums.UserRole;
 import com.ojo.mullyuojo.exception.DuplicateUsernameException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,7 +37,8 @@ public class AuthService {
         }
 
         Long userId = user.getId();
-        String accessToken = jwTokenProvider.createAccessToken(userId.toString());
+        UserRole.UserRoles role = user.getRole();
+        String accessToken = jwTokenProvider.createAccessToken(userId.toString(),role);
         String refreshToken = jwTokenProvider.createRefreshToken(userId.toString());
 
         return new AuthResponseDto("로그인 완료", accessToken, refreshToken);
