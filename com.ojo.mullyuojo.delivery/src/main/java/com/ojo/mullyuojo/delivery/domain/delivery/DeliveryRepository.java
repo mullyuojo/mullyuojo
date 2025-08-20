@@ -12,17 +12,17 @@ import java.util.Optional;
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
-    @Query("select d from delivery_tb d where d.originHubId = :hubId or d.destinationHubId = :hubId and d.deletedBy = null order by d.id desc")
+    @Query("select d from delivery_tb d where d.originHubId = :hubId or d.destinationHubId = :hubId and d.deletedBy is null order by d.id desc")
     List<Delivery> findAllByHubId(@Param("hubId") Long hubId);
 
-    @Query("select d from delivery_tb d where (d.originHubId in :hubIds or d.destinationHubId in :hubIds) and d.deletedBy = null")
+    @Query("select d from delivery_tb d where (d.originHubId in :hubIds or d.destinationHubId in :hubIds) and d.deletedBy is null")
     List<Delivery> findAllByHubIds(@Param("hubIds") List<Long> hubIds);
 
     List<Delivery> findAllByHubDeliveryManagerIdAndDeletedByIsNull(Long id);
 
     List<Delivery> findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(Long id);
 
-    @Query("select d from delivery_tb d where d.destinationCompanyId in :companyIds ")
+    @Query("select d from delivery_tb d where d.destinationCompanyId in :companyIds and d.deletedBy is null ")
     List<Delivery> findAllByDestinationCompanyIds(@Param("companyIds") List<Long> companyIds);
 
     Optional<Delivery> findByIdAndDeletedByIsNull(Long aLong);
