@@ -14,12 +14,12 @@ public interface HubDeliveryRepository extends JpaRepository<HubDelivery, Long> 
 
     Optional<HubDelivery> findByIdAndDeletedByIsNull(Long aLong);
 
-    @Query("select d from hub_delivery_tb d where (d.originHubId in :hubIds or d.destinationHubId in :hubIds) and d.deletedBy = null")
+    @Query("select d from hub_delivery_tb d where (d.originHubId in :hubIds or d.destinationHubId in :hubIds) and d.deletedBy is null")
     List<HubDelivery> findAllByHubIds(@Param("hubIds") List<Long> hubIdList);
 
     List<HubDelivery> findAllByHubDeliveryManagerIdAndDeletedByIsNull(Long hubDeliveryManagerId);
 
-    @Query("select d from hub_delivery_tb d where d.destinationHubId in :companyIdList and d.deletedBy = null")
+    @Query("select d from hub_delivery_tb d where d.destinationHubId in :companyIdList and d.deletedBy is null")
     List<HubDelivery> findAllByDestinationCompanyIds(@Param("companyIdList") List<Long> companyIdList);
 
     HubDelivery findByDeliveryIdAndDeletedByIsNull(Long deliveryId);
