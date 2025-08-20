@@ -18,9 +18,7 @@ public record DeliveryRequestDto(
         @NotNull
         String companyManagerSlackId,
         @NotNull
-        Long hubDeliveryManagerId,
+        Long hubDeliveryManagerId
 
-        @NotNull
-        Long companyDeliveryManagerId
 ) {
 }
