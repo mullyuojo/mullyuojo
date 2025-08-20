@@ -5,7 +5,6 @@ import lombok.Builder;
 
 @Builder
 public record DeliveryUpdateRequestDto(
-
         Long originHubId,
         Long destinationHubId,
         Long orderId,
