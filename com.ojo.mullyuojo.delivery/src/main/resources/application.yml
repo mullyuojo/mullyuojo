@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: delivery-service
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+      hibernate:
+        transaction:
+          jta: platform:org.hibernate.service.jta.JtaPlatform
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/delivery
+    username:
+    password:
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 19098
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka
