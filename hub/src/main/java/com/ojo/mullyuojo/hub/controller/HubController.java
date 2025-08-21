@@ -20,6 +20,16 @@ public class HubController {
 
     private final HubService hubService;
 
+    @ModelAttribute
+    public AccessContext setAccessContext(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Role") Role role,
+            @RequestHeader("X-Company-Id") Long companyId,
+            @RequestHeader("X-Hub-Id") Long hubId
+    ) {
+        return new AccessContext(userId, role, companyId, hubId);
+    }
+
     @GetMapping
     public ResponseEntity<Page<HubResponseDto>> getHubs (
             @ModelAttribute HubSearchDto dto,
@@ -29,44 +39,27 @@ public class HubController {
 
     @GetMapping("/{id}")
     public ResponseEntity<HubResponseDto> getHub (
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @PathVariable Long id){
         return ResponseEntity.ok(hubService.getHubById(id));
     }
 
     @PostMapping
     public ResponseEntity<HubResponseDto> createHub (@Valid @RequestBody HubRequestDto dto,
-                                                     @RequestHeader("X-User-Id") String userId,
-                                                     @RequestHeader("X-Role") Role role,
-                                                     @RequestHeader("X-Company-Id") Long companyId,
-                                                     @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
-        return ResponseEntity.ok(hubService.createHub(dto,userId, ctx));
+                                                     @ModelAttribute AccessContext ctx){
+        return ResponseEntity.ok(hubService.createHub(dto, ctx.getUserId(), ctx));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<HubResponseDto> updateHub (
             @PathVariable Long id,
             @RequestBody HubRequestDto dto,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @ModelAttribute AccessContext ctx){
         return ResponseEntity.ok(hubService.updateHub(id, dto, ctx ));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHub (@PathVariable Long id,
-                                           @RequestHeader(value = "X-User-Id", required = true) String userId,
-                                           @RequestHeader(value = "X-Role", required = true) Role role,
-                                           @RequestHeader(value = "X-Company-Id", required = true) Long companyId,
-                                           @RequestHeader(value = "X-Hub-Id", required = true) Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+                                           @ModelAttribute AccessContext ctx){
         hubService.deleteHub(id, ctx);
         return ResponseEntity.noContent().build();
     }

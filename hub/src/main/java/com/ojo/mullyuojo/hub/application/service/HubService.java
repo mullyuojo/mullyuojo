@@ -86,7 +86,6 @@ public class HubService {
         AccessGuard.requiredPermission(Action.DELETE, ctx);
 
         hub.deleteHub(ctx.getUserId());
-        hubRepository.save(hub);
     }
 
 }

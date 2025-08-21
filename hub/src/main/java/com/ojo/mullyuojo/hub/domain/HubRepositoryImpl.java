@@ -30,7 +30,7 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
         List<Hub> hubs = queryFactory
                 .selectFrom(hub)
                 .where(
-                        hub.deletedAt.isNotNull(),
+                        hub.deletedAt.isNull(),
                         hubNameContains(dto.getHubName()),
                         addressContains(dto.getAddress()),
                         provinceEq(dto.getProvince())
@@ -44,7 +44,7 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
                 .select(hub.count())
                 .from(hub)
                 .where(
-                        hub.deletedAt.isNotNull(),
+                        hub.deletedAt.isNull(),
                         hubNameContains(dto.getHubName()),
                         addressContains(dto.getAddress()),
                         provinceEq(dto.getProvince())

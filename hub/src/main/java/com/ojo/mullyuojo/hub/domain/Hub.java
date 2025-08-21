@@ -3,6 +3,7 @@ package com.ojo.mullyuojo.hub.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ojo.mullyuojo.hub.application.dtos.GeocodeResponse;
 import com.ojo.mullyuojo.hub.application.dtos.HubRequestDto;
+import com.ojo.mullyuojo.hub.application.dtos.HubResponseDto;
 import com.ojo.mullyuojo.hub.application.exception.BusinessException;
 import com.ojo.mullyuojo.hub.application.exception.ErrorCode;
 import com.ojo.mullyuojo.hub.application.security.AccessContext;
@@ -26,7 +27,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "hubs", indexes = { @Index(name = "idx_hubs_name", columnList = "name")})
+@Table(name = "hubs", indexes = { @Index(name = "idx_hubs_name", columnList = "hubs_name")})
 @EntityListeners(AuditingEntityListener.class)
 @SQLDelete(sql = "UPDATE hubs SET deleted_at = now(), deleted_by = ? WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
@@ -74,6 +75,17 @@ public class Hub {
 
     @Version
     private Long version;
+
+    public HubResponseDto toResponseDto(){
+        return HubResponseDto.builder()
+                .id(this.id)
+                .hubName(this.hubName)
+                .address(this.address)
+                .province(this.province)
+                .latitude(this.latitude)
+                .longitude(this.longitude)
+                .build();
+    }
 
     public static Hub createHub(HubRequestDto dto, String userId, AccessContext ctx,
                                 BigDecimal latitude, BigDecimal longitude) {
