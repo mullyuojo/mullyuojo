@@ -1,6 +1,8 @@
 server:
   port: 19091
 spring:
+  autoconfigure:
+
   application:
     name: gateway
   cloud:
@@ -24,6 +26,10 @@ spring:
               uri: lb://user
               predicates:
               - Path=/users/**
+            - id: slack
+              uri: lb:://slack
+              predicates:
+                - Path=/slack/**
 
     discovery:
       locator:

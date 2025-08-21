@@ -26,7 +26,6 @@ public class SecurityConfig {
                         // 로그인, 회원가입 API는 모든 요청 허용
                         .pathMatchers("/auth/login", "/auth/signin").permitAll()
                         //.pathMatchers("/**").permitAll()   // 임시로 모든 요청 허용
-
                         // 그 외 모든 요청은 인증 필요
                         //.anyExchange().authenticated()
                         .anyExchange().permitAll()

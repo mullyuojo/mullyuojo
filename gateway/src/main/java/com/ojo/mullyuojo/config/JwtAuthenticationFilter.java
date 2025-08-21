@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("[Global JWT Filter] Incoming request path: {}", path);
 
         // 공개 경로 예외 처리
-        List<String> publicPaths = List.of("/auth/login", "/auth/signin");
+        List<String> publicPaths = List.of("/auth/login", "/auth/signup");
         if (publicPaths.stream().anyMatch(path::contains)) {
             log.info(">>> [JWT GlobalFilter] Public path, bypass auth");
             return chain.filter(exchange); // 토큰 검사 없이 통과
@@ -39,11 +39,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String token = resolveToken(request);
         if (token != null && jwtTokenValidator.validateToken(token)) {
             String userId = jwtTokenValidator.getUserId(token);
+            String userRole = jwtTokenValidator.getUserRole(token);
             log.info("[Global JWT Filter] Authenticated user: {}, adding X-User-Id header", userId);
 
             // 사용자 ID를 다음 서비스로 전달
             ServerHttpRequest modifiedRequest = request.mutate()
-                    .header("X-User-Id", userId)
+                    .header("X-USER-ID", userId)
+                    .header("X-USER-ROLE", userRole)
                     .build();
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());

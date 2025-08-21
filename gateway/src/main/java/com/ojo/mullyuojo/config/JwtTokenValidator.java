@@ -57,6 +57,10 @@ public class JwtTokenValidator {
         return parseClaims(token).get("user_id", String.class);
     }
 
+    public String getUserRole(String token) {
+        return parseClaims(token).get("role", String.class);
+    }
+
     // 토큰의 유효성 + 만료일자 확인
     public boolean validateToken(String jwtToken) {
         try {

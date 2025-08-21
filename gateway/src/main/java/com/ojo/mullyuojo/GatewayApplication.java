@@ -1,4 +1,4 @@
-package com.ojo.mullyuojo.gateway;
+package com.ojo.mullyuojo;
 
 import com.ojo.mullyuojo.config.JwtProperties;
 import org.springframework.boot.SpringApplication;
