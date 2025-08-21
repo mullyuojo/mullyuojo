@@ -1,5 +1,6 @@
-package com.ojo.mullyuojo.slackmessage;
+package com.ojo.mullyuojo.slackmessage.domain.slackmessage;
 
+import com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto.SlackRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

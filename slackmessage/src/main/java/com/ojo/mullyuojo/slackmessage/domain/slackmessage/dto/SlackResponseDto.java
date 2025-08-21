@@ -1,5 +1,6 @@
-package com.ojo.mullyuojo.slackmessage;
+package com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto;
 
+import com.ojo.mullyuojo.slackmessage.domain.slackmessage.SlackMessage;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

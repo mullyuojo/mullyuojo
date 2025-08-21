@@ -1,5 +1,7 @@
-package com.ojo.mullyuojo.slackmessage;
+package com.ojo.mullyuojo.slackmessage.domain.slackmessage;
 
+import com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto.SlackRequestDto;
+import com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto.SlackResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

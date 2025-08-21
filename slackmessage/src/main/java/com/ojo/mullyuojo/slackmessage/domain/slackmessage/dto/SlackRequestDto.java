@@ -1,4 +1,4 @@
-package com.ojo.mullyuojo.slackmessage;
+package com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto;
 
 import lombok.Getter;
 

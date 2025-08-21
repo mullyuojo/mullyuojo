@@ -1,3 +1,4 @@
+
 server:
   port: 19093
 spring:
@@ -13,3 +14,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090/eureka/
+
+slack:
+  bot:
+    token: xoxb-9380129097203-9385345045154-KVNF8THKQLK8fuPAGjDVgefr

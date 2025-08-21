@@ -1,7 +1,7 @@
-package com.ojo.mullyuojo.slackmessage;
+package com.ojo.mullyuojo.slackmessage.domain.slackmessage;
 
+import com.ojo.mullyuojo.slackmessage.domain.slackmessage.dto.SlackRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
