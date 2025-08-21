@@ -11,19 +11,20 @@ import com.ojo.mullyuojo.delivery.domain.delivery.client.user.DeliveryUserDto;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','COMPANY_DELIVERY_MANAGER','COMPANY_MANAGER')")
 public class CompanyDeliveryService {
     private final CompanyDeliveryRepository companyDeliveryRepository;
     private final DeliveryHubClient deliveryHubClient;
@@ -133,6 +134,7 @@ public class CompanyDeliveryService {
         companyDelivery.update(delivery);
     }
 
+    @PreAuthorize("hasRole('MASTER')")
     public void deleteCompanyDelivery(Long hubDeliveryId) {
         CompanyDelivery companyDelivery = findById(hubDeliveryId);
         companyDelivery.softDelete(1L);

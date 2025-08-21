@@ -12,6 +12,7 @@ import com.ojo.mullyuojo.delivery.domain.hub_move.HubMoveService;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.Objects;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+//@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DELIVERY_MANAGER','COMPANY_MANAGER')")
 public class HubDeliveryService {
 
     private final HubDeliveryRepository hubDeliveryRepository;
@@ -138,7 +140,7 @@ public class HubDeliveryService {
         hubDelivery.update(delivery);
 
     }
-
+//    @PreAuthorize("hasRole('MASTER')")
     public void deleteHubDelivery(Long hubDeliveryId) {
         HubDelivery hubDelivery = findById(hubDeliveryId);
         hubDelivery.softDelete(1L);
