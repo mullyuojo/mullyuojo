@@ -6,7 +6,6 @@ import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompany
 import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubClient;
 import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubDto;
-import com.ojo.mullyuojo.delivery.domain.delivery.client.user.DeliveryUserDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryResponseDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryUpdateRequestDto;
@@ -17,62 +16,52 @@ import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
+//@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DELIVERY_MANAGER','COMPANY_DELIVERY_MANAGER','COMPANY_MANAGER')")
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final HubDeliveryService hubDeliveryService;
     private final CompanyDeliveryService companyDeliveryService;
     private final DeliveryHubClient deliveryHubClient;
-    private final DeliveryCompanyClient deliveryCompanyClient;
     private final CompanyDeliveryUserService companyDeliveryUserService;
-    private final List<DeliveryUserDto> users = new ArrayList<>(
-            Arrays.asList(
-                    new DeliveryUserDto(1L, "MASTER"),
-                    new DeliveryUserDto(2L, "HUB"),
-                    new DeliveryUserDto(3L, "HUB_DELIVERY"),
-                    new DeliveryUserDto(4L, "COM_DELIVERY"),
-                    new DeliveryUserDto(5L, "COMPANY")
-            )
-    );
-    @Transactional
-    public List<DeliveryResponseDto> getAllDelivery(Long userId) {
 
-        DeliveryUserDto user = users.get(Math.toIntExact(userId));
-        String userRole = user.getUserRole();
+
+    @Transactional
+    public List<DeliveryResponseDto> getAllDelivery(Authentication auth) {
+        Long userId = Long.valueOf((String)auth.getPrincipal());
+        String userRole = auth.getAuthorities().toString();
+        log.info("user Id : {}, user Role : {}", userId, userRole);
+
         List<Delivery> deliveryList = new ArrayList<>();
         switch (userRole) {
-            case "MASTER " -> deliveryList = deliveryRepository.findAll();
-            case "HUB" -> {
-                Long hubId = 1L;
+            case "[MASTER]" -> deliveryList = deliveryRepository.findAll();
+            case "[HUB]" -> {
                 //허브한테 feignClient
-                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
                 deliveryList = deliveryRepository.findAllByHubIds(hubIdList);
             }
-            case "HUB_DELIVERY" -> {
-                Long hubDeliveryManagerId = 1L;
-                deliveryList = deliveryRepository.findAllByHubDeliveryManagerIdAndDeletedByIsNull(hubDeliveryManagerId);
+            case "[HUB_DELIVERY]" -> {
+                deliveryList = deliveryRepository.findAllByHubDeliveryManagerIdAndDeletedByIsNull(userId);
             }
-            case "COM_DELIVERY" -> {
-                Long companyDeliveryManagerId = 1L;
-                deliveryList = deliveryRepository.findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(companyDeliveryManagerId);
+            case "[COM_DELIVERY]" -> {
+                deliveryList = deliveryRepository.findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(userId);
             }
-            case "COMPANY" -> {
+            case "[COMPANY]" -> {
                 //업체한테 feignClient
-                List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
-                List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
-                deliveryList = deliveryRepository.findAllByDestinationCompanyIds(companyIdList);
+                deliveryList = deliveryRepository.findAllByCompanyManagerIdAndDeletedByIsNull(userId);
             }
         }
         return deliveryList.stream()
@@ -80,19 +69,21 @@ public class DeliveryService {
                 .toList();
     }
 
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER')")
     @Transactional
-    public DeliveryResponseDto getDelivery(Long id, Long userId) {
-        DeliveryUserDto user = users.get(Math.toIntExact(userId));
-        String userRole = user.getUserRole();
+    public DeliveryResponseDto getDelivery(Long id, Authentication auth) {
+        Long userId = Long.valueOf((String)auth.getPrincipal());
+        String userRole = auth.getAuthorities().toString();
+        log.info("user Id : {}, user Role : {}", userId, userRole);
+
         Delivery delivery = findById(id);
         switch (userRole) {
-            case "MASTER " -> {
+            case "MASTER" -> {
                 return DeliveryResponseDto.from(delivery);
             }
             case "HUB" -> {
-                Long hubId = 1L;
                 //허브한테 feignClient
-                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(user.getUserId());
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
                 if (!hubIdList.contains(delivery.getOriginHubId()) || !hubIdList.contains(delivery.getDestinationHubId())) {
                     throw new RuntimeException("접근 권한이 없습니다.");
@@ -100,25 +91,21 @@ public class DeliveryService {
                 return DeliveryResponseDto.from(delivery);
             }
             case "HUB_DELIVERY" -> {
-                Long hubDeliveryManagerId = 1L;
-                if (!Objects.equals(delivery.getHubDeliveryManagerId(), hubDeliveryManagerId)) {
+                if (!Objects.equals(delivery.getHubDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("접근 권한이 없습니다.");
                 }
                 return DeliveryResponseDto.from(delivery);
             }
             case "COM_DELIVERY" -> {
-                Long companyDeliveryManagerId = 1L;
-                if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), companyDeliveryManagerId)) {
+                if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("접근 권한이 없습니다.");
                 }
                 return DeliveryResponseDto.from(delivery);
             }
             case "COMPANY" -> {
                 //업체한테 feignClient
-                List<DeliveryCompanyDto> companyList = deliveryCompanyClient.findCompaniesByManager(userId);
-                List<Long> companyIdList = companyList.stream().map(DeliveryCompanyDto::getId).toList();
-                if (!companyIdList.contains(delivery.getDestinationCompanyId())) {
-                    throw new ForbiddenException("접근 권한이 없습니다.");
+                if (!Objects.equals(delivery.getCompanyManagerId(), userId)) {
+                    throw new ForbiddenException("수정 권한이 없습니다.");
                 }
                 return DeliveryResponseDto.from(delivery);
             }
@@ -128,13 +115,9 @@ public class DeliveryService {
         return DeliveryResponseDto.from(delivery);
     }
 
+    @PreAuthorize("hasRole('MASTER')")
     @Transactional
-    public void createDelivery(DeliveryRequestDto requestDto, Long userId) {
-        DeliveryUserDto user = users.get(Math.toIntExact(userId));
-        if (!user.getUserRole().equals("MASTER")) {
-            throw new ForbiddenException("생성 권한이 없습니다.");
-        }
-
+    public void createDelivery(DeliveryRequestDto requestDto, Authentication auth) {
         Long deliveryUserId = companyDeliveryUserService.findNextUserInHub(requestDto.destinationHubId()); // 배송 시퀀스에 따라 배정되는 배송 담당자
 
         Delivery delivery = new Delivery(requestDto.orderId(),
@@ -147,18 +130,44 @@ public class DeliveryService {
                 requestDto.hubDeliveryManagerId(),
                 deliveryUserId
         );
-
         deliveryRepository.save(delivery);
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER')")
     @Transactional
-    public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto, Long userId) {
-        DeliveryUserDto user = users.get(Math.toIntExact(userId));
-        if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB") && !user.getUserRole().equals("HUB_DELIVERY") && !user.getUserRole().equals("COM_DELIVERY")) {
-            throw new ForbiddenException("수정 권한이 없습니다.");
-        }
+    public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto, Authentication auth) {
+        Long userId = Long.valueOf((String)auth.getPrincipal());
+        String userRole = auth.getAuthorities().toString();
+        log.info("user Id : {}, user Role : {}", userId, userRole);
+
         Delivery delivery = findById(id);
+
+        switch (userRole) {
+            case "HUB" -> {
+                //허브한테 feignClient
+                List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
+                List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
+                if (!hubIdList.contains(delivery.getOriginHubId()) || !hubIdList.contains(delivery.getDestinationHubId())) {
+                    throw new RuntimeException("수정 권한이 없습니다.");
+                }
+            }
+            case "HUB_DELIVERY" -> {
+                if (!Objects.equals(delivery.getHubDeliveryManagerId(), userId)) {
+                    throw new ForbiddenException("수정 권한이 없습니다.");
+                }
+            }
+            case "COM_DELIVERY" -> {
+                if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), userId)) {
+                    throw new ForbiddenException("수정 권한이 없습니다.");
+                }
+            }
+            case "COMPANY" -> {
+                if (!Objects.equals(delivery.getCompanyManagerId(), userId)) {
+                    throw new ForbiddenException("수정 권한이 없습니다.");
+                }
+            }
+        }
         delivery.update(
                 requestDto.orderId(),
                 requestDto.deliveryStatus(),
@@ -187,14 +196,11 @@ public class DeliveryService {
             companyDeliveryService.changeStatus(delivery.getId(), CompanyDeliveryStatus.DELIVERED);
             companyDeliveryService.updateCompanyDelivery(delivery);
         }
-
     }
 
-    public void deleteDelivery(Long id, Long userId) {
-        DeliveryUserDto user = users.get(Math.toIntExact(userId));
-        if (!user.getUserRole().equals("MASTER") && !user.getUserRole().equals("HUB")) {
-            throw new ForbiddenException("삭제 권한이 없습니다.");
-        }
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
+    public void deleteDelivery(Long id, Authentication auth) {
+        Long userId = Long.valueOf((String)auth.getPrincipal());
         Delivery delivery = findById(id);
         delivery.softDelete(userId);
     }

@@ -26,4 +26,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     List<Delivery> findAllByDestinationCompanyIds(@Param("companyIds") List<Long> companyIds);
 
     Optional<Delivery> findByIdAndDeletedByIsNull(Long aLong);
+
+    List<Delivery> findAllByCompanyManagerIdAndDeletedByIsNull(Long userId);
 }
