@@ -29,7 +29,27 @@ spring:
             - id: slack
               uri: lb:://slack
               predicates:
-                - Path=/slack/**
+              - Path=/slack/**
+            - id : delivery
+              uri: lb:://delivery
+              predicates:
+              - Path=/deliveries/**
+            - id: hub_delivery
+              uri: lb:://delivery
+              predicates:
+              - Path=/hub-delivery-channels/**
+            - id: company
+              uri: lb:://company
+              predicates:
+                - Path=/companies/**
+            - id: hub
+              uri: lb:://hub
+              predicates:
+                - Path=/hubs/**
+            - id: hub-info
+              uri: lb:://hub-info
+              predicates:
+                - Path=/hub-infos/**
 
     discovery:
       locator:
