@@ -19,6 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class CompanyController {
     private final CompanyService companyService;
 
+    @ModelAttribute
+    public AccessContext setAccessContext(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Role") Role role,
+            @RequestHeader("X-Company-Id") Long companyId,
+            @RequestHeader("X-Hub-Id") Long hubId
+    ) {
+        return new AccessContext(userId, role, companyId, hubId);
+    }
+
     // 목록 조회
     @GetMapping
     public ResponseEntity<Page<CompanyResponseDto>> getCompanies(
@@ -29,13 +39,7 @@ public class CompanyController {
     // 단일 조회
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponseDto> getCompany(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @PathVariable Long id){
         return ResponseEntity.ok(companyService.getCompanyById(id));
     }
 
@@ -43,13 +47,8 @@ public class CompanyController {
     @PostMapping
     public ResponseEntity<CompanyResponseDto> createCompany(
             @Valid @RequestBody CompanyRequestDto dto,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
-        return ResponseEntity.ok(companyService.createCompany(dto, userId, ctx));
+            @ModelAttribute AccessContext ctx){
+        return ResponseEntity.ok(companyService.createCompany(dto, ctx.getUserId(), ctx));
     }
 
     // 업체 수정
@@ -57,11 +56,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDto> updateCompany(
             @PathVariable Long id,
             @Valid @RequestBody CompanyRequestDto dto,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @ModelAttribute AccessContext ctx){
         return ResponseEntity.ok(companyService.updateCompany(id, dto, ctx));
     }
 
@@ -69,12 +64,8 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompany(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
-        companyService.deleteCompany(id, userId, ctx);
+            @ModelAttribute AccessContext ctx){
+        companyService.deleteCompany(id, ctx.getUserId(), ctx);
         return ResponseEntity.noContent().build();
     }
 }
