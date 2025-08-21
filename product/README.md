@@ -21,33 +21,6 @@
 
 ---
 
-## 🗂️ 프로젝트 구조
-src
-└─ main
-├─ java
-│  └─ com
-│     └─ ojo
-│        └─ mullyuojo
-│           └─ product
-│              ├─ application
-│              │  ├─ ProductService.java
-│              │  ├─ dtos
-│              │  │  ├─ ProductRequestDto.java
-│              │  │  ├─ ProductResponseDto.java
-│              │  │  └─ ProductSearchDto.java
-│              │  └─ security
-│              │     ├─ AccessContext.java
-│              │     ├─ Role.java
-│              │     └─ AccessGuard.java
-│              ├─ controller
-│              │  └─ ProductController.java
-│              └─ domain
-│                 ├─ Product.java
-│                 ├─ ProductRepository.java
-│                 └─ ProductRepositoryImpl.java
-└─ resources
-└─ application.yml
-
 
 ---
 
