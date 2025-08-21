@@ -76,7 +76,7 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
                 .from(order)
                 .where(builder)
                 .offset(pageable.getOffset())
-                .limit(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
         //전체 카운트
         Long total = queryFactory
@@ -91,11 +91,11 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
     }
 
     private BooleanExpression writerContains(String writer){
-        return writer != null ? order.writer.contains(writer) : null;
+        return writer != null ? order.writer.containsIgnoreCase(writer) : null;
     }
 
     private BooleanExpression productNameContains(String name){
-        return name != null ? order.productName.contains(name) : null;
+        return name != null ? order.productName.containsIgnoreCase(name) : null;
     }
 
     private BooleanExpression StatusEq(OrderStatus status){

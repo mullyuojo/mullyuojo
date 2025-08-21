@@ -22,9 +22,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "order", indexes = { @Index(name = "idx_orders_name", columnList = "name")})
+@Table(name = "orders", indexes = { @Index(name = "idx_orders_name", columnList = "name")})
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE products SET deleted_at = now(), deleted_by = ? WHERE id = ?")
+@SQLDelete(sql = "UPDATE orders SET deleted_at = now(), deleted_by = ? WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Order {
 
@@ -93,6 +93,12 @@ public class Order {
 
     @PrePersist
     public void setDeadline() {
+        // createdAt이 null이면 현재 시각으로 초기화
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+
+        // deadLine 기본값: createdAt 기준 +7일
         if (this.deadLine == null) {
             this.deadLine = this.createdAt.plusDays(7);
         }

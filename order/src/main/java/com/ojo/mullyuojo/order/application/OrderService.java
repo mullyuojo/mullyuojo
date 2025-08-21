@@ -53,10 +53,6 @@ public class OrderService {
         );
         Order order = Order.createOrder(requestDto, userId);
 
-        // 주문 내 상품의 업체 강제 세팅
-        order.setReceiverId(ctx.getCompanyId());
-        order.setSupplierId(ctx.getCompanyId()); // <-- 나중에 product의 companyId로 바꿔야함
-
         Order savedOrder = orderRepository.save(order);
         return toResponseDto(savedOrder);
     }

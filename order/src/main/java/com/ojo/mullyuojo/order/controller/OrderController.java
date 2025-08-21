@@ -19,6 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final OrderService orderService;
 
+    @ModelAttribute
+    public AccessContext setAccessContext(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Role") Role role,
+            @RequestHeader("X-Company-Id") Long companyId,
+            @RequestHeader("X-Hub-Id") Long hubId
+    ) {
+        return new AccessContext(userId, role, companyId, hubId);
+    }
+
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
             @ModelAttribute OrderSearchDto searchDto,
@@ -29,45 +39,27 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDto> getOrder(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @ModelAttribute AccessContext ctx){
         return ResponseEntity.ok(orderService.getOrderById(id, ctx));
     }
 
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@Valid @RequestBody OrderRequestDto requestDto,
-                                                        @RequestHeader(value = "X-User-Id", required = true) String userId,
-                                                        @RequestHeader(value = "X-Role", required = true) Role role,
-                                                        @RequestHeader(value = "X-Company-Id", required = true) Long companyId,
-                                                        @RequestHeader(value = "X-Hub-Id", required = true) Long hubId) {
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
-        return ResponseEntity.ok(orderService.createOrder(requestDto, userId, ctx));
+                                                        @ModelAttribute AccessContext ctx){
+        return ResponseEntity.ok(orderService.createOrder(requestDto, ctx.getUserId(), ctx));
     }
 
-    @PatchMapping("/{id}/cancle")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderResponseDto> cancelOrder(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-Role") Role role,
-            @RequestHeader("X-Company-Id") Long companyId,
-            @RequestHeader("X-Hub-Id") Long hubId
-    ){
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+            @ModelAttribute AccessContext ctx){
         OrderResponseDto responseDto = orderService.cancelOrder(id, ctx);
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id,
-                                            @RequestHeader("X-User-Id") String userId,
-                                            @RequestHeader("X-Role") Role role,
-                                            @RequestHeader("X-Company-Id") Long companyId,
-                                            @RequestHeader("X-Hub-Id") Long hubId
-    ){
-        AccessContext ctx = new AccessContext(userId, role, companyId, hubId);
+                                            @ModelAttribute AccessContext ctx){
         orderService.deleteOrder(id, ctx);
         return ResponseEntity.noContent().build();
     }
