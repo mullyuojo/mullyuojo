@@ -21,29 +21,6 @@
 
 ---
 
-## 🗂️ 프로젝트 구조
-src
-└─ main
-├─ java
-│ └─ com.ojo.mullyuojo.product
-│ ├─ application
-│ │ ├─ ProductService.java
-│ │ ├─ dtos
-│ │ │ ├─ ProductRequestDto.java
-│ │ │ ├─ ProductResponseDto.java
-│ │ │ └─ ProductSearchDto.java
-│ │ └─ security
-│ │ ├─ AccessContext.java
-│ │ ├─ Role.java
-│ │ └─ AccessGuard.java
-│ ├─ controller
-│ │ └─ ProductController.java
-│ └─ domain
-│ ├─ Product.java
-│ ├─ ProductRepository.java
-│ └─ ProductRepositoryImpl.java
-└─ resources
-└─ application.yml
 
 ---
 
@@ -177,19 +154,44 @@ Headers:
 - X-Company-Id
 - X-Hub-Id
 ```
+# AccessGuard 권한 설정 (Product Service)
+
+상품(Product) 서비스에서 사용자의 역할(Role)과 리소스 범위(ResourceScope)에 따른 액션(Action) 권한을 정의한 표입니다.
+
+---
+
+## 권한 설정 표
+
+| 역할(Role)       | CREATE | READ | UPDATE | DELETE | 리소스 범위 제한 | 설명 |
+|-----------------|--------|------|--------|--------|-----------------|------|
+| MASTER           | ✅     | ✅   | ✅     | ✅     | 없음            | 모든 액션 허용 |
+| HUB_MANAGER      | ✅     | ✅   | ✅     | ✅     | 담당 Hub        | 허브 관리자 권한은 본인 Hub에서만 가능 |
+| DELIVERY_USER    | ❌     | ✅   | ❌     | ❌     | 담당 Hub        | 조회만 가능, 본인 Hub 범위 내 |
+| COMPANY_STAFF    | ❌     | ✅   | ✅     | ❌     | 본인 Company    | 삭제 불가, 본인 업체만 접근 가능 |
+
+- ✅: 해당 액션 허용
+- ❌: 해당 액션 불가 (시도 시 `BusinessException` 발생)
+
+---
+
+## 권한 검증 로직
+
+- `AccessGuard.requiredPermission(Action action, AccessContext ctx, ResourceScope scope)` 사용
+- MASTER: 모든 액션 허용
+- HUB_MANAGER: 지정된 Hub에서만 모든 액션 허용
+- DELIVERY_USER: 지정된 Hub에서 READ만 허용
+- COMPANY_STAFF: 본인 Company에서 READ, UPDATE 가능, DELETE 불가
+
+## 검증 시 예외 처리
+
+- 인증 정보 없을 경우 → `BusinessException(ACCESS_DENIED)`
+- 리소스 범위와 불일치 → `BusinessException(ACCESS_DENIED)`
+- 필요한 리소스 정보 누락 → `BusinessException(INVALID_INPUT)`
+
+
 
 🔒 접근 제어
 
 AccessContext 기반으로 사용자 권한 및 소속 Hub/Company 검증
-
 Action과 ResourceScope를 통해 CRUD 접근 제어 수행
 
-⚙️ DTO / 엔티티 주의 사항
-| 필드          | Nullable | 비고            |
-| ----------- | -------- | ------------- |
-| name        | false    | 공백/Null 체크 필요 |
-| price       | false    | 10원 단위, 음수 불가 |
-| stock       | false    | 1 이상, 음수 불가   |
-| description | true     | 선택 입력         |
-| companyId   | false    | 필수            |
-| hubId       | false    | 필수            |
