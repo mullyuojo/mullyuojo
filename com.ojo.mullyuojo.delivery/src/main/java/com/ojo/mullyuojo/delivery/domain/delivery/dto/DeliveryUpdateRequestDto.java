@@ -12,7 +12,6 @@ public record DeliveryUpdateRequestDto(
         Long destinationCompanyId,
         Long companyManagerId,
         String companyManagerSlackId,
-        Long hubDeliveryManagerId,
-        Long companyDeliveryManagerId
+        Long hubDeliveryManagerId
 ) {
 }

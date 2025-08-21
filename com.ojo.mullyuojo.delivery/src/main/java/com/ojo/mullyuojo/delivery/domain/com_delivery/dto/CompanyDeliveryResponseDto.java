@@ -13,7 +13,7 @@ public record CompanyDeliveryResponseDto(
         Double estimatedTime,
         Double actualDistance,
         Double actualTime,
-        Long CompanyDeliveryManagerId
+        Long companyDeliveryManagerId
 ) {
     public static CompanyDeliveryResponseDto from(CompanyDelivery companyDelivery) {
         return new CompanyDeliveryResponseDto(

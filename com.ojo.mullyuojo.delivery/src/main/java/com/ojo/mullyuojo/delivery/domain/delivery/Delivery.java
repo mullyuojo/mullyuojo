@@ -57,7 +57,7 @@ public class Delivery {
         this.deletedBy = userId;
     }
 
-    public void update( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {
+    public void update( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId) {
         this.orderId = orderId;
         this.status = status;
         this.originHubId = originHubId;
@@ -66,7 +66,6 @@ public class Delivery {
         this.companyManagerId = companyManagerId;
         this.companyManagerSlackId = companyManagerSlackId;
         this.hubDeliveryManagerId = hubDeliveryManagerId;
-        this.companyDeliveryManagerId = companyDeliveryManagerId;
     }
 
     public Delivery( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {

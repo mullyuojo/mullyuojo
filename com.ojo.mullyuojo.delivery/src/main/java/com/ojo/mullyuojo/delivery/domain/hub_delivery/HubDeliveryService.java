@@ -8,6 +8,7 @@ import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.client.user.DeliveryUserDto;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.dto.HubDeliveryResponseDto;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
+import com.ojo.mullyuojo.delivery.domain.hub_move.HubMoveService;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,18 +28,23 @@ public class HubDeliveryService {
     private final HubDeliveryRepository hubDeliveryRepository;
     private final DeliveryHubClient deliveryHubClient;
     private final DeliveryCompanyClient deliveryCompanyClient;
+    private final HubMoveService hubMoveService;
     private final DeliveryUserDto user = new DeliveryUserDto(1L, "MASTER");
 
     @Transactional
     public void createHubDeliveryByDelivery(Delivery delivery) {
+
+        Long originHubId = delivery.getOriginHubId();
+        Long destinationHubId = delivery.getDestinationHubId();
+        List<Double> disAndTime = hubMoveService.estimate(originHubId, destinationHubId);
 
         HubDelivery hubDelivery = new HubDelivery(
                 delivery.getId(),
                 HubDeliveryStatus.WAITING_AT_HUB,
                 delivery.getOriginHubId(),
                 delivery.getDestinationHubId(),
-                10.0, //예상거리
-                10.0, //예상시간
+                disAndTime.get(0), //예상거리
+                disAndTime.get(1), //예상시간
                 delivery.getHubDeliveryManagerId() //HubDeliveryManagerId
         );
         hubDeliveryRepository.save(hubDelivery);
@@ -132,6 +138,7 @@ public class HubDeliveryService {
         hubDelivery.update(delivery);
 
     }
+
     public void deleteHubDelivery(Long hubDeliveryId) {
         HubDelivery hubDelivery = findById(hubDeliveryId);
         hubDelivery.softDelete(1L);

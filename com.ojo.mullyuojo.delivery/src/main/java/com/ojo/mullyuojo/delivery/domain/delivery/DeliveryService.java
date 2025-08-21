@@ -167,8 +167,7 @@ public class DeliveryService {
                 requestDto.destinationCompanyId(),
                 requestDto.companyManagerId(),
                 requestDto.companyManagerSlackId(),
-                requestDto.hubDeliveryManagerId(),
-                requestDto.companyDeliveryManagerId());
+                requestDto.hubDeliveryManagerId());
 
         //배송이 IN_TRANSIT_TO_HUB일 때 허브 배송 경로 기록 생성
         if (requestDto.deliveryStatus().equals(DeliveryStatus.IN_TRANSIT_TO_HUB)) {
