@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class OrderService {
     private final OrderRepository orderRepository;
 
@@ -45,6 +44,7 @@ public class OrderService {
     }
 
     // 주문 생성
+    @Transactional
     public OrderResponseDto createOrder(OrderRequestDto requestDto,String userId, AccessContext ctx) {
         AccessGuard.requiredPermission(
                 Action.CREATE,

@@ -24,5 +24,4 @@ public class OrderRequestDto {
 
     private String requestNotes;
     private String requestDates;
-    private String deadLine;
 }

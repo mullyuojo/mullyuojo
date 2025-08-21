@@ -78,7 +78,7 @@ public class Order {
     private LocalDateTime createdAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "deadLine", nullable = false)
+    @Column(name = "deadLine")
     private LocalDateTime deadLine;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
