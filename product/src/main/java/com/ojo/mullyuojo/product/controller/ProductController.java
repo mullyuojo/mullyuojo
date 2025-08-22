@@ -31,8 +31,8 @@ public class ProductController {
     }
 
     //목록 검색
-    @GetMapping
-    public ResponseEntity<Page<ProductResponseDto>> getProducts(@ModelAttribute ProductSearchDto searchDto,
+    @PostMapping("/search")
+    public ResponseEntity<Page<ProductResponseDto>> getProducts(@RequestBody ProductSearchDto searchDto,
                                                                 Pageable pageable,
                                                                 AccessContext ctx)
     {

@@ -23,13 +23,13 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: 19093
+  port: 19097
 
 eureka:
   client:
     enabled: false
-#    service-url:
-#      defaultZone: http://localhost:19090/eureka/
+    service-url:
+      defaultZone: http://localhost:19090/eureka
 
 #management:
 #  tracing:
