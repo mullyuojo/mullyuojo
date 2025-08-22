@@ -5,8 +5,10 @@ import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryUpdateRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryResponseDto;
 import com.ojo.mullyuojo.delivery.utils.ApiResponse;
+import com.ojo.mullyuojo.delivery.utils.QueueMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +35,10 @@ public class DeliveryController {
     }
 
     //주문생성시 자동으로 호출 -> message queue 활용
+    @RabbitListener(queues = "${message.queue.delivery}")
     @PostMapping("")
-    public ApiResponse<?> createDelivery(@RequestBody @Valid DeliveryRequestDto requestDto, Authentication auth) {
-        deliveryService.createDelivery(requestDto, auth);
+    public ApiResponse<?> createDelivery(@RequestBody @Valid DeliveryRequestDto requestDto, Authentication auth, QueueMessage queueMessage) {
+        deliveryService.createDelivery(requestDto, auth, queueMessage);
         return ApiResponse.success(201, "배송 생성 완료");
     }
 
