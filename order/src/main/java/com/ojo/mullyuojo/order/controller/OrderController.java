@@ -29,9 +29,9 @@ public class OrderController {
         return new AccessContext(userId, role, companyId, hubId);
     }
 
-    @GetMapping
+    @PostMapping("/search")
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
-            @ModelAttribute OrderSearchDto searchDto,
+            @RequestBody OrderSearchDto searchDto,
             Pageable pageable){
         return ResponseEntity.ok(orderService.getOrders(searchDto, pageable));
     }
