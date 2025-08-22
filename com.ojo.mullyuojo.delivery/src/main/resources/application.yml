@@ -12,12 +12,17 @@ spring:
       hibernate:
         transaction:
           jta: platform:org.hibernate.service.jta.JtaPlatform
-
   datasource:
     url: jdbc:postgresql://localhost:5432/delivery
     username: root
     password: 1234
     driver-class-name: org.postgresql.Driver
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 
 server:
   port: 19098
@@ -25,3 +30,13 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090/eureka
+
+#    rabbitMQ
+message:
+  exchange: mullyuojo
+  err:
+    exchange: mullyuojo.err
+  queue:
+    delivery: mullyuojo.delivery
+    err:
+      delivery: mullyuojo.err.dlivery

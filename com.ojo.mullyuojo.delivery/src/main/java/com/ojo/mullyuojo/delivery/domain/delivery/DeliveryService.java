@@ -2,8 +2,6 @@ package com.ojo.mullyuojo.delivery.domain.delivery;
 
 import com.ojo.mullyuojo.delivery.domain.com_delivery.CompanyDeliveryService;
 import com.ojo.mullyuojo.delivery.domain.com_delivery.status.CompanyDeliveryStatus;
-import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyClient;
-import com.ojo.mullyuojo.delivery.domain.delivery.client.company.DeliveryCompanyDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubClient;
 import com.ojo.mullyuojo.delivery.domain.delivery.client.hub.DeliveryHubDto;
 import com.ojo.mullyuojo.delivery.domain.delivery.dto.DeliveryRequestDto;
@@ -13,6 +11,7 @@ import com.ojo.mullyuojo.delivery.domain.delivery.status.DeliveryStatus;
 import com.ojo.mullyuojo.delivery.domain.delivery_user.CompanyDeliveryUserService;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.HubDeliveryService;
 import com.ojo.mullyuojo.delivery.domain.hub_delivery.status.HubDeliveryStatus;
+import com.ojo.mullyuojo.delivery.utils.QueueMessage;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,16 +46,16 @@ public class DeliveryService {
         List<Delivery> deliveryList = new ArrayList<>();
         switch (userRole) {
             case "[MASTER]" -> deliveryList = deliveryRepository.findAll();
-            case "[HUB]" -> {
+            case "[HUB_MANAGER]" -> {
                 //허브한테 feignClient
                 List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
                 deliveryList = deliveryRepository.findAllByHubIds(hubIdList);
             }
-            case "[HUB_DELIVERY]" -> {
+            case "[HUB_DELIVERY_MANAGER]" -> {
                 deliveryList = deliveryRepository.findAllByHubDeliveryManagerIdAndDeletedByIsNull(userId);
             }
-            case "[COM_DELIVERY]" -> {
+            case "[COMPANY_DELIVERY_MANAGER]" -> {
                 deliveryList = deliveryRepository.findAllByCompanyDeliveryManagerIdAndDeletedByIsNull(userId);
             }
             case "[COMPANY]" -> {
@@ -69,7 +68,7 @@ public class DeliveryService {
                 .toList();
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER')")
+    //@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER')")
     @Transactional
     public DeliveryResponseDto getDelivery(Long id, Authentication auth) {
         Long userId = Long.valueOf((String)auth.getPrincipal());
@@ -78,10 +77,10 @@ public class DeliveryService {
 
         Delivery delivery = findById(id);
         switch (userRole) {
-            case "MASTER" -> {
+            case "[MASTER]" -> {
                 return DeliveryResponseDto.from(delivery);
             }
-            case "HUB" -> {
+            case "[HUB_MANAGER]" -> {
                 //허브한테 feignClient
                 List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
@@ -90,19 +89,19 @@ public class DeliveryService {
                 }
                 return DeliveryResponseDto.from(delivery);
             }
-            case "HUB_DELIVERY" -> {
+            case "[HUB_DELIVERY_MANAGER]" -> {
                 if (!Objects.equals(delivery.getHubDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("접근 권한이 없습니다.");
                 }
                 return DeliveryResponseDto.from(delivery);
             }
-            case "COM_DELIVERY" -> {
+            case "[COMPANY_DELIVERY_MANAGER]" -> {
                 if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("접근 권한이 없습니다.");
                 }
                 return DeliveryResponseDto.from(delivery);
             }
-            case "COMPANY" -> {
+            case "[COMPANY_MANAGER]" -> {
                 //업체한테 feignClient
                 if (!Objects.equals(delivery.getCompanyManagerId(), userId)) {
                     throw new ForbiddenException("수정 권한이 없습니다.");
@@ -115,12 +114,14 @@ public class DeliveryService {
         return DeliveryResponseDto.from(delivery);
     }
 
-    @PreAuthorize("hasRole('MASTER')")
+    //@PreAuthorize("hasRole('MASTER')")
     @Transactional
-    public void createDelivery(DeliveryRequestDto requestDto, Authentication auth) {
+    public void createDelivery(DeliveryRequestDto requestDto, Authentication auth, QueueMessage queueMessage) {
+        Long orderId = queueMessage.getOrderId();
         Long deliveryUserId = companyDeliveryUserService.findNextUserInHub(requestDto.destinationHubId()); // 배송 시퀀스에 따라 배정되는 배송 담당자
 
-        Delivery delivery = new Delivery(requestDto.orderId(),
+        Delivery delivery = new Delivery(
+                orderId,
                 requestDto.deliveryStatus(),
                 requestDto.originHubId(),
                 requestDto.destinationHubId(),
@@ -134,7 +135,7 @@ public class DeliveryService {
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER')")
+    //@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER','COMPANY_MANAGER')")
     @Transactional
     public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto, Authentication auth) {
         Long userId = Long.valueOf((String)auth.getPrincipal());
@@ -144,7 +145,7 @@ public class DeliveryService {
         Delivery delivery = findById(id);
 
         switch (userRole) {
-            case "HUB" -> {
+            case "[HUB_MANAGER]" -> {
                 //허브한테 feignClient
                 List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);
                 List<Long> hubIdList = hubList.stream().map(DeliveryHubDto::getId).toList();
@@ -152,17 +153,17 @@ public class DeliveryService {
                     throw new RuntimeException("수정 권한이 없습니다.");
                 }
             }
-            case "HUB_DELIVERY" -> {
+            case "[HUB_DLIVERY_MANAGER]" -> {
                 if (!Objects.equals(delivery.getHubDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("수정 권한이 없습니다.");
                 }
             }
-            case "COM_DELIVERY" -> {
+            case "[COM_DLIVERY_MANAGER]" -> {
                 if (!Objects.equals(delivery.getCompanyDeliveryManagerId(), userId)) {
                     throw new ForbiddenException("수정 권한이 없습니다.");
                 }
             }
-            case "COMPANY" -> {
+            case "[COMPANY_MANAGER]" -> {
                 if (!Objects.equals(delivery.getCompanyManagerId(), userId)) {
                     throw new ForbiddenException("수정 권한이 없습니다.");
                 }
@@ -198,7 +199,7 @@ public class DeliveryService {
         }
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
+    //@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
     public void deleteDelivery(Long id, Authentication auth) {
         Long userId = Long.valueOf((String)auth.getPrincipal());
         Delivery delivery = findById(id);
