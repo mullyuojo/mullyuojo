@@ -24,7 +24,9 @@ public class CompanySearchDto {
     private String address;
     private String writer;
 
-    private Long productId;   // <- CompanyProduct ID 리스트
+    private Long productId; // <- CompanyProduct ID 리스트
+    private String productName;
     private Long managerId;
+    private String managerName;
 
 }

@@ -58,6 +58,13 @@ public class CompanyRepositoryImpl implements CompanyRepositoryCustom {
                             .where(companyProduct.id.eq(searchDto.getProductId()))
             ));
         }
+        if (searchDto.getProductName() != null && !searchDto.getProductName().isBlank()) {
+            builder.and(company.id.in(
+                    JPAExpressions.select(companyProduct.company.id)
+                            .from(companyProduct)
+                            .where(companyProduct.name.containsIgnoreCase(searchDto.getProductName()))
+            ));
+        }
 
         // 담당자 ID 조건
         if (searchDto.getManagerId() != null) {
@@ -67,6 +74,14 @@ public class CompanyRepositoryImpl implements CompanyRepositoryCustom {
                             .where(companyManager.id.eq(searchDto.getManagerId()))
             ));
         }
+        if (searchDto.getManagerName() != null && !searchDto.getManagerName().isBlank()) {
+            builder.and(company.id.in(
+                    JPAExpressions.select(companyManager.company.id)
+                            .from(companyManager)
+                            .where(companyManager.name.containsIgnoreCase(searchDto.getManagerName()))
+            ));
+        }
+
 
         // JPAQuery 객체 생성
         JPAQuery<Company> query = queryFactory

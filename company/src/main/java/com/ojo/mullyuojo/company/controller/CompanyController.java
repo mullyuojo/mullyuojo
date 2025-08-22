@@ -30,9 +30,9 @@ public class CompanyController {
     }
 
     // 목록 조회
-    @GetMapping
+    @PostMapping("/search")
     public ResponseEntity<Page<CompanyResponseDto>> getCompanies(
-            @ModelAttribute CompanySearchDto searchDto,
+            @RequestBody CompanySearchDto searchDto,
             Pageable pageable) {
         return ResponseEntity.ok(companyService.getCompanies(searchDto, pageable));
     }
