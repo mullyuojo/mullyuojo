@@ -53,7 +53,7 @@ public class DeliveryController {
     @PatchMapping("/{deliveryId}")
     public ApiResponse<?> updateDelivery(@PathVariable(name = "deliveryId") Long deliveryId, @RequestBody DeliveryUpdateRequestDto requestDto, Authentication auth) {
         deliveryService.updateDelivery(deliveryId, requestDto, auth);
-        return ApiResponse.success(200, "배송 생성 완료");
+        return ApiResponse.success(200, "배송 수정 완료");
     }
 
     @DeleteMapping("/{deliveryId}")
