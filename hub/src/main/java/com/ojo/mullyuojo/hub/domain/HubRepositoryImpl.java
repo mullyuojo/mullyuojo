@@ -49,12 +49,30 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
             ));
         }
 
+        // 업체명 조건 (서브쿼리)
+        if (searchDto.getCompanyName() != null && !searchDto.getCompanyName().isBlank()) {
+            builder.and(hub.id.in(
+                    JPAExpressions.select(companyList.hub.id)
+                            .from(companyList)
+                            .where(companyList.name.containsIgnoreCase(searchDto.getCompanyName()))
+            ));
+        }
+
         // 배송 담당자 ID 조건 (서브쿼리)
         if (searchDto.getDeliveryManagerId() != null) {
             builder.and(hub.id.in(
                     JPAExpressions.select(deliveryManagerList.hub.id)
                             .from(deliveryManagerList)
                             .where(deliveryManagerList.id.eq(searchDto.getDeliveryManagerId()))
+            ));
+        }
+
+        // 배송 담당자명 조건 (서브쿼리)
+        if (searchDto.getDeliveryManagerName() != null && !searchDto.getDeliveryManagerName().isBlank()) {
+            builder.and(hub.id.in(
+                    JPAExpressions.select(deliveryManagerList.hub.id)
+                            .from(deliveryManagerList)
+                            .where(deliveryManagerList.name.containsIgnoreCase(searchDto.getDeliveryManagerName()))
             ));
         }
 

@@ -30,9 +30,9 @@ public class HubController {
         return new AccessContext(userId, role, companyId, hubId);
     }
 
-    @GetMapping
+    @PostMapping("/search")
     public ResponseEntity<Page<HubResponseDto>> getHubs (
-            @ModelAttribute HubSearchDto dto,
+            @RequestBody HubSearchDto dto,
             Pageable pageable) {
         return ResponseEntity.ok(hubService.getHubs(dto, pageable));
     }
