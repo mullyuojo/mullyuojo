@@ -42,7 +42,6 @@ public class Delivery {
     @Column(nullable = false)
     private Long hubDeliveryManagerId;
 
-    @Column(nullable = false)
     private Long companyDeliveryManagerId;
 
     private LocalDateTime deletedAt;
@@ -53,11 +52,11 @@ public class Delivery {
         this.status = status;
     }
 
-    public void softDelete(Long userId){
+    public void softDelete(Long userId) {
         this.deletedBy = userId;
     }
 
-    public void update( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId) {
+    public void update(Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId) {
         this.orderId = orderId;
         this.status = status;
         this.originHubId = originHubId;
@@ -68,7 +67,7 @@ public class Delivery {
         this.hubDeliveryManagerId = hubDeliveryManagerId;
     }
 
-    public Delivery( Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {
+    public Delivery(Long orderId, DeliveryStatus status, Long originHubId, Long destinationHubId, Long destinationCompanyId, Long companyManagerId, String companyManagerSlackId, Long hubDeliveryManagerId, Long companyDeliveryManagerId) {
         this.orderId = orderId;
         this.status = status;
         this.originHubId = originHubId;

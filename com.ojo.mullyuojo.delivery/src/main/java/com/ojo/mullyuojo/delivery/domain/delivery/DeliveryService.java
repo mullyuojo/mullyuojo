@@ -15,7 +15,6 @@ import com.ojo.mullyuojo.delivery.utils.QueueMessage;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,12 +116,15 @@ public class DeliveryService {
     //@PreAuthorize("hasRole('MASTER')")
     @Transactional
     public void createDelivery(DeliveryRequestDto requestDto, Authentication auth, QueueMessage queueMessage) {
-        Long orderId = queueMessage.getOrderId();
+        Long orderId = requestDto.orderId();
         Long deliveryUserId = companyDeliveryUserService.findNextUserInHub(requestDto.destinationHubId()); // 배송 시퀀스에 따라 배정되는 배송 담당자
 
+        if( deliveryUserId == null) {
+            throw new RuntimeException("배송 담당자가 0명입니다.");
+        }
         Delivery delivery = new Delivery(
                 orderId,
-                requestDto.deliveryStatus(),
+                DeliveryStatus.WAITING_AT_HUB,
                 requestDto.originHubId(),
                 requestDto.destinationHubId(),
                 requestDto.destinationCompanyId(),
@@ -135,6 +137,42 @@ public class DeliveryService {
         hubDeliveryService.createHubDeliveryByDelivery(delivery);
     }
 
+    @Transactional
+    public void createDeliveryByQueue(QueueMessage queueMessage) {
+        Long orderId = queueMessage.getOrderId();
+        Long supplyCom = queueMessage.getSupplyCompanyId();
+        Long receiveCom = queueMessage.getReceiveCompanyId();
+
+        //TODO : feignClient 구현
+        Long originHubId = 1L;
+        Long destinationHubId = 2L;
+        Long destinationCompanyId = receiveCom;
+        Long companyManagerId = 1L;
+        String companyManagerSlackId = "abc";
+        Long hubDeliveryManagerId = 1L;
+
+        Long deliveryUserId = companyDeliveryUserService.findNextUserInHub(destinationHubId); // 배송 시퀀스에 따라 배정되는 배송 담당자
+        if( deliveryUserId == null) {
+            throw new RuntimeException("배송 담당자가 0명입니다.");
+        }
+
+        Delivery delivery = new Delivery(
+                orderId,
+                DeliveryStatus.WAITING_AT_HUB,
+                originHubId,
+                destinationHubId,
+                destinationCompanyId,
+                companyManagerId,
+                companyManagerSlackId,
+                hubDeliveryManagerId,
+                deliveryUserId
+        );
+        deliveryRepository.save(delivery);
+        hubDeliveryService.createHubDeliveryByDelivery(delivery);
+
+
+
+    }
     //@PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','HUB_DLIVERY_MANAGER','COM_DLIVERY_MANAGER','COMPANY_MANAGER')")
     @Transactional
     public void updateDelivery(Long id, DeliveryUpdateRequestDto requestDto, Authentication auth) {
@@ -209,6 +247,7 @@ public class DeliveryService {
     private Delivery findById(Long id) {
         return deliveryRepository.findByIdAndDeletedByIsNull(id).orElseThrow(() -> new RuntimeException("해당 배송을 찾을 수 없습니다."));
     }
+
 
 
 }

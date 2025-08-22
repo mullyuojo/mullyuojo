@@ -22,7 +22,6 @@ spring:
     port: 5672
     username: guest
     password: guest
-    virtual-host: /
 
 server:
   port: 19098
@@ -31,7 +30,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:19090/eureka
 
-#    rabbitMQ
+
 message:
   exchange: mullyuojo
   err:
