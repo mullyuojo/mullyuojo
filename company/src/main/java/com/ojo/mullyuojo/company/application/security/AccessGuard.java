@@ -22,7 +22,7 @@ public class AccessGuard {
                 }
                 return;
             }
-            case DELIVERY_USER -> {
+            case HUB_DELIVERY_MANAGER, COMPANY_DELIVERY_MANAGER -> {
                 requireHub(scope);
                 if(!ctx.getHubId().equals(scope.getHubId())){
                     throw new BusinessException(ErrorCode.ACCESS_DENIED, "담당 허브를 벗어난 조회입니다.");
@@ -32,7 +32,7 @@ public class AccessGuard {
                 }
                 return;
             }
-            case COMPANY_STAFF -> {
+            case COMPANY_MANAGER -> {
                 requireCompany(scope);
                 if(!ctx.getCompanyId().equals(scope.getCompanyId())){
                     throw new BusinessException(ErrorCode.ACCESS_DENIED, "업체 담당자는 본인 업체만 조회가 가능합니다");

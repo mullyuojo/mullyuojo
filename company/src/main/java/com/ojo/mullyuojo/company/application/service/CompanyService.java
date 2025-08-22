@@ -24,13 +24,25 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     // 목록 조회
+    @Transactional
     public Page<CompanyResponseDto> getCompanies(CompanySearchDto searchDto, Pageable pageable) {
-        return companyRepository.searchCompanies(searchDto, pageable);
+        Page<Company> companies = companyRepository.searchCompanies(searchDto, pageable);
+
+        // LAZY 컬렉션 초기화
+        companies.forEach(company -> company.getManagers().size());
+
+        return companies.map(CompanyResponseDto::from);
     }
+
     // 단일 조회
+    @Transactional
     public CompanyResponseDto getCompanyById(Long id) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(()-> new BusinessException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // LAZY 컬렉션 초기화
+        company.getManagers().size();   // managers 컬렉션 초기화
+
         return CompanyResponseDto.from(company);
     }
 
@@ -40,7 +52,7 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.CREATE,
                 ctx,
-                ResourceScope.of(dto.getHubId(), dto.getCompanyId())
+                ResourceScope.of(dto.getHubId(), ctx.getCompanyId())
                 );
 
         Company company = Company.createCompany(dto, userId);
@@ -57,7 +69,7 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.UPDATE,
                 ctx,
-                ResourceScope.of(company.getHubId(), company.getCompanyId()));
+                ResourceScope.of(company.getHubId(), company.getId()));
 
         company.updateCompany(dto);
         return company.toResponseDto();
@@ -71,7 +83,7 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.DELETE,
                 ctx,
-                ResourceScope.of(company.getHubId(), company.getCompanyId()));
+                ResourceScope.of(company.getHubId(), company.getId()));
 
         company.deleteCompany(userId);
     }

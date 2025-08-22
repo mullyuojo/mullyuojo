@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CompanyRepositoryCustom {
-    Page<CompanyResponseDto> searchCompanies(CompanySearchDto companySearchDto, Pageable pageable);
+    Page<Company> searchCompanies(CompanySearchDto companySearchDto, Pageable pageable);
 }
