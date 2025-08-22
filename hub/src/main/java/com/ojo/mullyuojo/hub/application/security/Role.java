@@ -1,8 +1,5 @@
 package com.ojo.mullyuojo.hub.application.security;
 
 public enum Role {
-    MASTER,
-    HUB_MANAGER,
-    DELIVERY_USER,
-    COMPANY_STAFF
+    MASTER, HUB_MANAGER, COMPANY_MANAGER, HUB_DELIVERY_MANAGER, COMPANY_DELIVERY_MANAGER
 }

@@ -15,7 +15,7 @@ public class AccessGuard {
             case MASTER -> {
                 return;
             }
-            case HUB_MANAGER, DELIVERY_USER, COMPANY_STAFF -> {
+            case HUB_MANAGER, COMPANY_MANAGER, HUB_DELIVERY_MANAGER, COMPANY_DELIVERY_MANAGER -> {
                 // 조회만 허용
                 if(action != Action.READ){
                     throw new BusinessException(ErrorCode.ACCESS_DENIED,"조회 및 검색만 가능힙니다.");

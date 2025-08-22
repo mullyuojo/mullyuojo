@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -22,11 +23,15 @@ public class QHub extends EntityPathBase<Hub> {
 
     public final StringPath address = createString("address");
 
+    public final ListPath<CompanyList, QCompanyList> companyLists = this.<CompanyList, QCompanyList>createList("companyLists", CompanyList.class, QCompanyList.class, PathInits.DIRECT2);
+
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
 
     public final StringPath deletedBy = createString("deletedBy");
+
+    public final ListPath<DeliveryManagerList, QDeliveryManagerList> deliveryManagerLists = this.<DeliveryManagerList, QDeliveryManagerList>createList("deliveryManagerLists", DeliveryManagerList.class, QDeliveryManagerList.class, PathInits.DIRECT2);
 
     public final StringPath hubName = createString("hubName");
 

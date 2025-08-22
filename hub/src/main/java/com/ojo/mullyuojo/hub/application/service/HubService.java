@@ -25,14 +25,25 @@ public class HubService {
     private final GeoService geoService;
     private final HubRepository hubRepository;
 
-    public Page<HubResponseDto> getHubs (HubSearchDto dto, Pageable pageable) {
-        return hubRepository.searchHubs(dto, pageable);
+    // 목록 조회
+    @Transactional
+    public Page<HubResponseDto> getHubs(HubSearchDto dto, Pageable pageable) {
+        Page<Hub> hubs = hubRepository.searchHubs(dto, pageable);
+
+        // LAZY 컬렉션 초기화 (deliveryManagerLists)
+        hubs.forEach(hub -> hub.getDeliveryManagerLists().size());
+
+        return hubs.map(HubResponseDto::from);
     }
 
-    @Transactional(readOnly = true)
+    // 단일 조회
+    @Transactional
     public HubResponseDto getHubById(Long id) {
         Hub hub = hubRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(()-> new BusinessException(ErrorCode.HUB_NOT_FOUND, "찾으시는 허브가 존재하지 않습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.HUB_NOT_FOUND, "찾으시는 허브가 존재하지 않습니다"));
+
+        // LAZY 컬렉션 초기화
+        hub.getDeliveryManagerLists().size();  // deliveryManagerLists 컬렉션 초기화
 
         return HubResponseDto.from(hub);
     }

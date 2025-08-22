@@ -11,8 +11,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class GeoService {
 
-    private final String NAVER_CLIENT_ID = "YOUR_ID";
-    private final String NAVER_CLIENT_SECRET = "YOUR_CLIENT_SECRET";
+    private final String NAVER_CLIENT_ID = "evd29haomr";
+    private final String NAVER_CLIENT_SECRET = "7UKSgU5cYJw2NfzmMYWdL9TErvdnqV1jKKFgP43q";
 
     public GeocodeResponse getGeocodeResponse(String address) {
         try {

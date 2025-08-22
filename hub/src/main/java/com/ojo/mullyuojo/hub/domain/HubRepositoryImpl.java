@@ -1,9 +1,11 @@
 package com.ojo.mullyuojo.hub.domain;
 
-import com.ojo.mullyuojo.hub.application.dtos.HubResponseDto;
 import com.ojo.mullyuojo.hub.application.dtos.HubSearchDto;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,8 +16,9 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.ojo.mullyuojo.hub.domain.QCompanyList.companyList;
+import static com.ojo.mullyuojo.hub.domain.QDeliveryManagerList.deliveryManagerList;
 import static com.ojo.mullyuojo.hub.domain.QHub.hub;
 
 @RequiredArgsConstructor
@@ -24,39 +27,65 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<HubResponseDto> searchHubs(HubSearchDto dto, Pageable pageable) {
-        List<OrderSpecifier<?>> orders = getAllOrderSpecifiers(pageable);
+    public Page<Hub> searchHubs(HubSearchDto searchDto, Pageable pageable) {
 
-        List<Hub> hubs = queryFactory
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(hubNameContains(searchDto.getHubName()));
+        builder.and(addressContains(searchDto.getAddress()));
+        builder.and(provinceEq(searchDto.getProvince()));
+
+        // id 검색
+        if (searchDto.getId() != null) {
+            builder.and(hub.id.eq(searchDto.getId()));
+        }
+
+        // 업체 ID 조건 (서브쿼리)
+        if (searchDto.getCompanyId() != null) {
+            builder.and(hub.id.in(
+                    JPAExpressions.select(companyList.hub.id)
+                            .from(companyList)
+                            .where(companyList.id.eq(searchDto.getCompanyId()))
+            ));
+        }
+
+        // 배송 담당자 ID 조건 (서브쿼리)
+        if (searchDto.getDeliveryManagerId() != null) {
+            builder.and(hub.id.in(
+                    JPAExpressions.select(deliveryManagerList.hub.id)
+                            .from(deliveryManagerList)
+                            .where(deliveryManagerList.id.eq(searchDto.getDeliveryManagerId()))
+            ));
+        }
+
+        // JPAQuery 객체 생성
+        JPAQuery<Hub> query = queryFactory
                 .selectFrom(hub)
-                .where(
-                        hub.deletedAt.isNull(),
-                        hubNameContains(dto.getHubName()),
-                        addressContains(dto.getAddress()),
-                        provinceEq(dto.getProvince())
-                )
-                .orderBy(orders.toArray(new OrderSpecifier[0]))
+                .leftJoin(hub.companyLists).fetchJoin()
+//                .leftJoin(hub.deliveryManagerLists).fetchJoin()
+                .where(builder)
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+                .limit(pageable.getPageSize());
 
+        // 정렬 적용
+        @SuppressWarnings("unchecked")
+        List<OrderSpecifier<?>> orderSpecifiersList = getAllOrderSpecifiers(pageable);
+        if (!orderSpecifiersList.isEmpty()) {
+            query.orderBy(orderSpecifiersList.toArray(new OrderSpecifier[0]));
+        }
+
+        // 조회 실행
+        List<Hub> hubEntities = query.fetch();
+
+        // 전체 카운트 조회
         Long total = queryFactory
                 .select(hub.count())
                 .from(hub)
-                .where(
-                        hub.deletedAt.isNull(),
-                        hubNameContains(dto.getHubName()),
-                        addressContains(dto.getAddress()),
-                        provinceEq(dto.getProvince())
-                )
+                .where(builder)
                 .fetchOne();
-        long totalCount = (total == null) ? 0L : total;
+        long totalCount = (total != null) ? total : 0L;
 
-        List<HubResponseDto> results = hubs.stream()
-                .map(HubResponseDto::from)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(results, pageable, totalCount);
+        return new PageImpl<>(hubEntities, pageable, totalCount);
     }
 
     private BooleanExpression hubNameContains(String hubName) {
@@ -73,18 +102,19 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
 
     public List<OrderSpecifier<?>> getAllOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
-        if(pageable.getSort() != null) {
-            for(Sort.Order sortOrder : pageable.getSort()) {
-                com.querydsl.core.types.Order direction = sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC;
-                switch(sortOrder.getProperty()) {
-                    case "createdAt":
-                        orders.add(new OrderSpecifier<>(direction, hub.createdAt));
-                        break;
+        if (pageable.getSort() != null) {
+            for (Sort.Order sortOrder : pageable.getSort()) {
+                com.querydsl.core.types.Order direction = sortOrder.isAscending() ?
+                        com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC;
+                switch (sortOrder.getProperty()) {
                     case "hubName":
                         orders.add(new OrderSpecifier<>(direction, hub.hubName));
                         break;
                     case "province":
                         orders.add(new OrderSpecifier<>(direction, hub.province));
+                        break;
+                    case "createdAt":
+                        orders.add(new OrderSpecifier<>(direction, hub.createdAt));
                         break;
                     default:
                         break;
@@ -93,5 +123,4 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
         }
         return orders;
     }
-
 }

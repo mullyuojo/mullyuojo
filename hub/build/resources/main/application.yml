@@ -28,8 +28,8 @@ server:
 eureka:
   client:
     enabled: false
-#    service-url:
-#      defaultZone: http://localhost:19090/eureka/
+    service-url:
+      defaultZone: http://localhost:19090/eureka
 
 #management:
 #  tracing:

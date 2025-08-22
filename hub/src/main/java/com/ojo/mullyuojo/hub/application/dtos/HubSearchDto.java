@@ -12,4 +12,8 @@ public class HubSearchDto {
     private String hubName;
     private String address;
     private String province;
+
+    private Long companyId;
+    private Long deliveryManagerId;
+
 }
