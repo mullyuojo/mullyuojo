@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: delivery-service
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+      hibernate:
+        transaction:
+          jta: platform:org.hibernate.service.jta.JtaPlatform
+  datasource:
+<<<<<<< HEAD
+    url: jdbc:postgresql://localhost:5432/mulluojo
+    username: postgres
+=======
+    url: jdbc:postgresql://localhost:5432/delivery
+    username: root
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 19098
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka
+
+
+message:
+  exchange: mullyuojo
+  err:
+    exchange: mullyuojo.err
+  queue:
+    delivery: mullyuojo.delivery
+    err:
+      delivery: mullyuojo.err.dlivery

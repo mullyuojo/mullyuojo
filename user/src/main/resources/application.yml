@@ -1,0 +1,72 @@
+<<<<<<< HEAD
+server:
+  port: 19092
+spring:
+  application:
+    name: user
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mulluojo
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  issuer: mulluojo-auth
+  secret-key: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429080fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1"
+  accessTokenExpirationMilisec: 3600000000
+  refreshTokenExpirationDays: 7
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+    com:
+      ojo:
+        mullyuojo: DEBUG
+
+eureka:
+  client:
+    service-url:
+=======
+server:
+  port: 19092
+spring:
+  application:
+    name: user
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mulluojo
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  issuer: mulluojo-auth
+  secret-key: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429080fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1"
+  accessTokenExpirationMilisec: 3600000000
+  refreshTokenExpirationDays: 7
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+    com:
+      ojo:
+        mullyuojo: DEBUG
+
+eureka:
+  client:
+    service-url:
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
+      defaultZone: http://localhost:19090/eureka/  # Eureka 서버의 URL을 지정

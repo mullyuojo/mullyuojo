@@ -1,0 +1,26 @@
+
+server:
+  port: 19093
+spring:
+  application:
+    name: slack
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mulluojo
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka/
+
+slack:
+  bot:
+    token: xoxb-9380129097203-9382116806515-QDKENlMGMm5VlnPDJvY6tYCW
