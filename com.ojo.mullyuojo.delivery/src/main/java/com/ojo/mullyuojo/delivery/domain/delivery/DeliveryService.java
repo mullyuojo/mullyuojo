@@ -15,6 +15,10 @@ import com.ojo.mullyuojo.delivery.utils.QueueMessage;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+<<<<<<< HEAD
+import org.springframework.security.access.prepost.PreAuthorize;
+=======
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +48,11 @@ public class DeliveryService {
 
         List<Delivery> deliveryList = new ArrayList<>();
         switch (userRole) {
+<<<<<<< HEAD
+            case "[ROLE_MASTER]" -> deliveryList = deliveryRepository.findAll();
+=======
             case "[MASTER]" -> deliveryList = deliveryRepository.findAll();
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
             case "[HUB_MANAGER]" -> {
                 //허브한테 feignClient
                 List<DeliveryHubDto> hubList = deliveryHubClient.findHubsByManager(userId);

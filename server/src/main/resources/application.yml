@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 spring:
   application:
     name: mulluojo-server
@@ -9,3 +10,16 @@ eureka:
     fetch-registry: false
   instance:
     hostname: localhost
+=======
+spring:
+  application:
+    name: mulluojo-server
+server:
+  port: 19090
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    hostname: localhost
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139

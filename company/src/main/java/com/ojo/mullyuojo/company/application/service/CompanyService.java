@@ -24,6 +24,15 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     // 목록 조회
+<<<<<<< HEAD
+    public Page<CompanyResponseDto> getCompanies(CompanySearchDto searchDto, Pageable pageable) {
+        return companyRepository.searchCompanies(searchDto, pageable);
+    }
+    // 단일 조회
+    public CompanyResponseDto getCompanyById(Long id) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(()-> new BusinessException(ErrorCode.COMPANY_NOT_FOUND));
+=======
     @Transactional
     public Page<CompanyResponseDto> getCompanies(CompanySearchDto searchDto, Pageable pageable) {
         Page<Company> companies = companyRepository.searchCompanies(searchDto, pageable);
@@ -43,6 +52,7 @@ public class CompanyService {
         // LAZY 컬렉션 초기화
         company.getManagers().size();   // managers 컬렉션 초기화
 
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
         return CompanyResponseDto.from(company);
     }
 
@@ -52,7 +62,11 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.CREATE,
                 ctx,
+<<<<<<< HEAD
+                ResourceScope.of(dto.getHubId(), dto.getCompanyId())
+=======
                 ResourceScope.of(dto.getHubId(), ctx.getCompanyId())
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
                 );
 
         Company company = Company.createCompany(dto, userId);
@@ -69,7 +83,11 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.UPDATE,
                 ctx,
+<<<<<<< HEAD
+                ResourceScope.of(company.getHubId(), company.getCompanyId()));
+=======
                 ResourceScope.of(company.getHubId(), company.getId()));
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
         company.updateCompany(dto);
         return company.toResponseDto();
@@ -83,7 +101,11 @@ public class CompanyService {
         AccessGuard.requiredPermission(
                 Action.DELETE,
                 ctx,
+<<<<<<< HEAD
+                ResourceScope.of(company.getHubId(), company.getCompanyId()));
+=======
                 ResourceScope.of(company.getHubId(), company.getId()));
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
         company.deleteCompany(userId);
     }

@@ -3,13 +3,19 @@ package com.ojo.mullyuojo.company.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ojo.mullyuojo.company.application.dtos.CompanyRequestDto;
 import com.ojo.mullyuojo.company.application.dtos.CompanyResponseDto;
+<<<<<<< HEAD
+=======
 import com.ojo.mullyuojo.company.application.dtos.manager.CompanyManagerDto;
 import com.ojo.mullyuojo.company.application.dtos.product.CompanyProductDto;
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 import com.ojo.mullyuojo.company.application.exception.BusinessException;
 import com.ojo.mullyuojo.company.application.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+<<<<<<< HEAD
+=======
 import org.hibernate.annotations.BatchSize;
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
@@ -18,8 +24,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+<<<<<<< HEAD
+=======
 import java.util.ArrayList;
 import java.util.List;
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
 @Getter
 @Setter
@@ -27,20 +36,40 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
+<<<<<<< HEAD
+@Table(name = "companies", indexes = { @Index(name = "idx_companies_name", columnList = "name")})
+@EntityListeners(AuditingEntityListener.class)
+@SQLDelete(sql = "UPDATE companies SET deleted_at = now(), deleted_by = ? WHERE id = ?")
+=======
 @Table(name = "company", indexes = { @Index(name = "idx_company_name", columnList = "name")})
 @EntityListeners(AuditingEntityListener.class)
 @SQLDelete(sql = "UPDATE company SET deleted_at = now(), deleted_by = ? WHERE id = ?")
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 @Where(clause = "deleted_at IS NULL")
 public class Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+<<<<<<< HEAD
+    Long id;
+
+    @Column(nullable = true)
+    private Long companyId;
+
+    @Column(nullable = true)
+    private Long hubId;
+
+    @Column(nullable = true)
+    private Long productId;
+
+=======
     @Column(name = "company_id")
     Long id;
 
     @Column(nullable = true)
     private Long hubId;
 
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     @Column
     private CompanyType type;
 
@@ -74,6 +103,20 @@ public class Company {
     @Version  //낙관적 락 구현(데이터 충돌=덮어쓰기 방지)
     private Long version;
 
+<<<<<<< HEAD
+    public static Company createCompany(CompanyRequestDto dto, String userId) {
+        requiredNonBlank(dto.getName(),"company name");
+        requiredNonBlank(dto.getAddress(),"company address");
+        return com.ojo.mullyuojo.company.domain.Company.builder()
+                .name(dto.getName().trim())
+                .address(dto.getAddress().trim())
+                .companyId(dto.getCompanyId())
+                .hubId(dto.getHubId())
+                .productId(dto.getProductId())
+                .type(dto.getType())
+                .writer(userId)
+                .build();
+=======
     // 상품 담당자 테이블
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @BatchSize(size = 10)
@@ -124,6 +167,7 @@ public class Company {
             company.setManagers(managerEntities);
         }
         return company;
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     }
 
     public void updateCompany(CompanyRequestDto dto) {
@@ -150,6 +194,18 @@ public class Company {
             this.type = dto.getType();
         }
 
+<<<<<<< HEAD
+        if(dto.getCompanyId()!=null){
+            if(dto.getCompanyId() <=0){
+                throw new BusinessException(ErrorCode.INVALID_INPUT,"업체ID는 1이상의 숫자여야 합니다.");
+            }
+            if(!dto.getCompanyId().equals(this.companyId)){
+                this.companyId = dto.getCompanyId();
+            }
+        }
+
+=======
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
         if(dto.getHubId()!=null){
             if(dto.getHubId() <=0){
                 throw new BusinessException(ErrorCode.INVALID_INPUT,"허브ID는 1이상의 숫자여야 합니다.");
@@ -158,6 +214,17 @@ public class Company {
                 this.hubId = dto.getHubId();
             }
         }
+<<<<<<< HEAD
+
+        if(dto.getProductId() != null){
+            if(dto.getProductId() <=0){
+                throw new BusinessException(ErrorCode.INVALID_INPUT,"제품ID는 1 이상의 숫자여야 합니다.");
+            }
+            if(!dto.getProductId().equals(this.productId)){
+                this.productId = dto.getProductId();
+            }
+        }
+=======
         // products 리스트가 존재하면 업데이트
         if (dto.getProducts() != null) {
             // 기존 엔티티 리스트 초기화
@@ -183,6 +250,7 @@ public class Company {
             });
         }
 
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -193,6 +261,18 @@ public class Company {
     }
 
     public CompanyResponseDto toResponseDto() {
+<<<<<<< HEAD
+        return new CompanyResponseDto(
+                this.id,
+                this.companyId,
+                this.hubId,
+                this.productId,
+                this.type,
+                this.name,
+                this.address,
+                this.writer
+        );
+=======
         return CompanyResponseDto.builder()
                 .id(this.id)
                 .hubId(this.hubId)
@@ -213,6 +293,7 @@ public class Company {
                         .toList()
                         : new ArrayList<>())
                 .build();
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     }
     // 유효성 검사
     private static void requiredNonBlank(String s, String f){

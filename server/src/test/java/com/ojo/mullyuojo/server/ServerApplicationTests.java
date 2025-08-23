@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.ojo.mullyuojo.server;
 
 import org.junit.jupiter.api.Test;
@@ -11,3 +12,18 @@ class ServerApplicationTests {
 	}
 
 }
+=======
+package com.ojo.mullyuojo.server;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ServerApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
