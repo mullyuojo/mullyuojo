@@ -1,10 +1,17 @@
 spring:
+<<<<<<< HEAD
   application:
     name: product
   datasource:
     url: jdbc:postgresql://localhost:5432/mulluojo
     username: postgres
     password: 1234
+=======
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mullyuojo
+    username: root
+    password: sparta1234
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
@@ -15,7 +22,13 @@ spring:
       format_sql: true
 
 
+<<<<<<< HEAD
 
+=======
+  cloud:
+    discovery:
+      enabled: false
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss"
@@ -27,6 +40,10 @@ server:
 
 eureka:
   client:
+<<<<<<< HEAD
+=======
+    enabled: false
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     service-url:
       defaultZone: http://localhost:19090/eureka
 

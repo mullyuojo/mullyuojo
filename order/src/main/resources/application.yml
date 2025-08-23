@@ -1,9 +1,16 @@
 spring:
   application:
+<<<<<<< HEAD
     name: order
   datasource:
     url: jdbc:postgresql://localhost:5432/mulluojo
     username: postgres
+=======
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mullyuojo
+    username: root
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     password: 1234
     driver-class-name: org.postgresql.Driver
   jpa:

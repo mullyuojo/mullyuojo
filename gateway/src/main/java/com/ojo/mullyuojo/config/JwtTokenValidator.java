@@ -40,7 +40,11 @@ public class JwtTokenValidator {
     // 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
+<<<<<<< HEAD
         String role = claims.get("role", String.class); // user 에서 넣은 role 정보를 꺼냅니다.
+=======
+        String role = claims.get("role", String.class); // user-service에서 넣은 role 정보를 꺼냅니다.
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(new String[]{role})

@@ -1,33 +1,57 @@
 spring:
+<<<<<<< HEAD
   application:
     name: company
   datasource:
     url: jdbc:postgresql://localhost:5432/mulluojo
     username: postgres
     password: 1234
+=======
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mullyuojo
+    username: root
+    password: sparta1234
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
     hibernate:
+<<<<<<< HEAD
       ddl-auto: create
+=======
+      ddl-auto: update
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     properties:
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
       format_sql: true
 
 
+<<<<<<< HEAD
 
+=======
+  cloud:
+    discovery:
+      enabled: false
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss"
     serialization:
       write-dates-as-timestamps: false
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
 server:
   port: 19096
 
 eureka:
   client:
+<<<<<<< HEAD
+=======
+    enabled: false
+>>>>>>> 92fb4c33cf5f2c9d97d49a95941d52f0216e7139
     service-url:
       defaultZone: http://localhost:19090/eureka
 
